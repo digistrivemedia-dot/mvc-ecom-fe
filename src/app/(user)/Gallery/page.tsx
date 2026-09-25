@@ -9,6 +9,10 @@ async function getAllProducts() {
   try {
     const response = await fetch(`${API_BASE_URL}/products/all`, {
       next: { revalidate: 60 }, // Cache for 60 seconds, same as other product listings
+      // Runs at build time for this statically-generated page — without a
+      // timeout, an unreachable/misconfigured API_BASE_URL hangs instead of
+      // failing fast, which can block the whole `next build` for 60s+.
+      signal: AbortSignal.timeout(8000),
     });
 
     if (!response.ok) {

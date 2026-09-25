@@ -4,6 +4,13 @@ import { revalidatePath } from "next/cache";
 import type { ProductCategory } from "@/types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000/api/v1';
+// These functions run at build time for statically-generated pages. If
+// NEXT_PUBLIC_API_BASE_URL isn't set in the deploy environment, the fallback
+// above points nowhere reachable — without a timeout, that fetch can hang
+// instead of failing fast, which blocks the whole `next build` for 60s+ per
+// page until Vercel kills the build. 8s is generous for a real backend and
+// short enough to never stall a build.
+const FETCH_TIMEOUT_MS = 8000;
 
 // Helper function to transform backend product to frontend format
 function transformProduct(backendProduct: any) {
@@ -97,6 +104,7 @@ export async function getAllProducts() {
     // data from an old cache entry. no-store guarantees fresh data every request.
     const response = await fetch(`${API_BASE_URL}/products/all`, {
       cache: 'no-store',
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
 
     if (!response.ok) {
@@ -150,6 +158,7 @@ export async function getProductsWithPagination(params: {
 
     const response = await fetch(url, {
       cache: 'no-store', // Disable cache for debugging
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
 
     if (!response.ok) {
@@ -209,6 +218,7 @@ export async function getCategoryProducts(category: ProductCategory) {
   try {
     const response = await fetch(`${API_BASE_URL}/products?category=${category}`, {
       next: { revalidate: 60 }, // Cache for 60 seconds
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
 
     if (!response.ok) {
@@ -229,6 +239,7 @@ export async function getProduct(productId: string) {
   try {
     const response = await fetch(`${API_BASE_URL}/product/${productId}`, {
       next: { revalidate: 60 }, // Cache for 60 seconds
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
 
     if (!response.ok) {
@@ -249,6 +260,7 @@ export async function getRandomProducts(limit: number = 4) {
     // Fetch random products from backend instead of fetching all and shuffling
     const response = await fetch(`${API_BASE_URL}/products/random?limit=${limit}`, {
       next: { revalidate: 60 }, // Cache for 1 minute
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
 
     if (!response.ok) {
@@ -272,6 +284,7 @@ export async function searchProducts(query: string) {
   try {
     const response = await fetch(`${API_BASE_URL}/products?keyword=${encodeURIComponent(query)}`, {
       next: { revalidate: 30 }, // Cache search results for 30 seconds
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
 
     if (!response.ok) {
