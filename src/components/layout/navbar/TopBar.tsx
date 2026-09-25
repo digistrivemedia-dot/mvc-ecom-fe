@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { FaPhone, FaCalculator, FaStore, FaSearch, FaUser, FaUserCircle, FaSignOutAlt, FaBox } from "react-icons/fa";
+import { FaPhone, FaStore, FaSearch, FaUser, FaUserCircle, FaSignOutAlt, FaBox } from "react-icons/fa";
 import { useSession } from "@/lib/auth/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -103,16 +103,6 @@ export const TopBar = ({ editProfileManager }: { editProfileManager: Manager }) 
             >
               <FaPhone className="text-brand-gold-light" size={16} />
               <span className="text-sm">{config.contact.phone}</span>
-            </Link>
-
-            {/* Calculator */}
-            <Link
-              href="/calculator"
-              className="hidden lg:flex flex-col items-center justify-center text-white hover:text-brand-gold-light transition-colors"
-              title="Calculator"
-            >
-              <FaCalculator size={20} />
-              <span className="text-xs mt-1">Calculator</span>
             </Link>
 
             {/* Store */}
