@@ -98,6 +98,12 @@ export default function VendorProductsPage() {
                     <span className="text-slate-500">Stock</span>
                     <span className="font-semibold text-slate-900">{product.stock}</span>
                   </div>
+                  {product.listingStatus === "rejected" && product.rejectionNote && (
+                    <div className="mt-1 px-3 py-2 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-xs font-medium text-red-700 mb-0.5">Rejection reason</p>
+                      <p className="text-xs text-red-600">{product.rejectionNote}</p>
+                    </div>
+                  )}
                   <div className="flex gap-2 pt-3">
                     <Link
                       href={`/vendor/products/${product._id}/edit`}

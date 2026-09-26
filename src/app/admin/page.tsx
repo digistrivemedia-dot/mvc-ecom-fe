@@ -225,7 +225,7 @@ export default async function AdminDashboard() {
             </div>
             <div>
               <h3 className="font-semibold text-slate-900">Add Product</h3>
-              <p className="text-sm text-slate-600">Create new tile product</p>
+              <p className="text-sm text-slate-600">Create new product</p>
             </div>
           </div>
         </Link>

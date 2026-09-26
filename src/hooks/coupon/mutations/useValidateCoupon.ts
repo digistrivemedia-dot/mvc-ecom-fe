@@ -23,6 +23,7 @@ export const useValidateCoupon = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("auth_token")}`,
         },
         body: JSON.stringify(data),
       });

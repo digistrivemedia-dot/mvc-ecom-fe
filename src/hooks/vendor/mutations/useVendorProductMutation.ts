@@ -11,7 +11,7 @@ export const useVendorProductMutation = () => {
   const create = useMutation({
     mutationFn: createVendorProduct,
     onSuccess: () => {
-      toast.success("Product submitted — pending superadmin pricing approval");
+      toast.success("Product submitted — pending admin approval");
       invalidate();
     },
     onError: (error: Error) => toast.error(error.message || "Failed to create product"),

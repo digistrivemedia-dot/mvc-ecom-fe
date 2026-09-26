@@ -121,10 +121,7 @@ export const PreviouslyViewed = ({ currentProductId }: PreviouslyViewedProps) =>
               <div className="flex items-center justify-between">
                 <div>
                   {product.price > 0 ? (
-                    <>
-                      <p className="text-xl font-bold text-orange-500">₹{product.price}</p>
-                      <p className="text-xs text-gray-500">per sq.ft</p>
-                    </>
+                    <p className="text-xl font-bold text-orange-500">₹{product.price}</p>
                   ) : (
                     <>
                       <p className="text-lg font-bold text-blue-600">Get Price</p>

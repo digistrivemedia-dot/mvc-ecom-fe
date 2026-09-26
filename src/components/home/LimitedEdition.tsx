@@ -30,23 +30,26 @@ async function getLimitedEditionProducts() {
 
         console.log(`⏰ Found ${limitedEditionProducts.length} limited edition products`);
 
-        // Randomly shuffle and take 8 products
-        const shuffled = limitedEditionProducts.sort(() => 0.5 - Math.random());
-        const selected = shuffled.slice(0, 8);
+        // Randomly shuffle and take 8 products — fall back to the scarcest
+        // (lowest stock), then newest products when nothing is tagged
+        // 'limited' yet — running low on stock is what "limited" means.
+        const selected = limitedEditionProducts.length > 0
+            ? limitedEditionProducts.sort(() => 0.5 - Math.random()).slice(0, 8)
+            : [...products].sort((a: any, b: any) => {
+                const stockDiff = (a.stock ?? Infinity) - (b.stock ?? Infinity);
+                return stockDiff !== 0 ? stockDiff : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+              }).slice(0, 8);
 
         console.log(`✅ Selected ${selected.length} random limited edition products`);
 
         return selected.map((product: any) => ({
             _id: product._id,
             name: product.name,
-            category: product.category?.name || 'Tiles',
+            category: product.category?.name || 'General',
             image: product.images?.[0]?.url || '/placeholder.jpg',
             price: product.price,
             cuttedPrice: product.cuttedPrice,
             slug: product.slug || product._id,
-            unit: product.unit,
-            coverage: product.coverage,
-            tilesPerBox: product.tilesPerBox,
             hasVariants: product.variants && product.variants.length > 1,
             variantId: product.variants?.[0]?.id || product.id,
             stripeId: product.stripeId || product.variants?.[0]?.stripeId,
@@ -69,7 +72,7 @@ export const LimitedEdition = async () => {
                         Limited Edition Products
                     </h2>
                     <p className="text-slate-600 text-lg">
-                        Rare and exclusive limited edition tile collections
+                        Rare and exclusive limited edition collections
                     </p>
                 </div>
                 <div className="text-center py-12 bg-slate-50 rounded-2xl">
@@ -88,7 +91,7 @@ export const LimitedEdition = async () => {
                         Limited Edition Products
                     </h2>
                     <p className="text-slate-600 text-lg">
-                        Rare and exclusive limited edition tile collections
+                        Rare and exclusive limited edition collections
                     </p>
                 </div>
                 <Link

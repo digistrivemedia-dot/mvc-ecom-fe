@@ -1,7 +1,6 @@
 /** FUNCTIONALITY */
 import { redirect } from "next/navigation";
 import { getProduct } from "@/app/actions";
-import { dummyTileProducts } from "@/lib/data/dummy-tiles";
 /** COMPONENTS */
 import { ProductDetailClient } from "@/components/product-detail";
 /** TYPES */
@@ -16,21 +15,7 @@ export const SingleProduct = async ({
   id,
   selectedVariantColor,
 }: SingleProductProps) => {
-  // Try to get real product, fallback to dummy data
-  let productPlainObject;
-  try {
-    productPlainObject = await getProduct(id);
-
-    if (!productPlainObject) {
-      // Fallback to dummy data
-      // @ts-ignore - dummy data uses string IDs
-      productPlainObject = dummyTileProducts.find(p => p.id === id) || dummyTileProducts[0];
-    }
-  } catch (error) {
-    // Fallback to dummy data
-    // @ts-ignore - dummy data uses string IDs
-    productPlainObject = dummyTileProducts.find(p => p.id === id) || dummyTileProducts[0];
-  }
+  const productPlainObject = await getProduct(id);
 
   if (!productPlainObject) {
     return <div className="text-center py-20">Product not found</div>;
@@ -53,7 +38,6 @@ export const SingleProduct = async ({
 
   return (
     <ProductDetailClient
-      // @ts-ignore - dummy data uses tile categories
       product={productPlainObject}
       productImages={productImages}
     />

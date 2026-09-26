@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: Props) {
 
   return {
     title: `${capitalizedCategory} | InveztIN`,
-    description: `${capitalizedCategory} category at InveztIN - Premium Tiles Showroom Bengaluru`,
+    description: `Browse ${capitalizedCategory} products on InveztIN.`,
   };
 }
 

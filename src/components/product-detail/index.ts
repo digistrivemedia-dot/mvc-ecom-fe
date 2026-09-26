@@ -4,5 +4,4 @@ export { ProductSpecifications } from "./ProductSpecifications";
 export { ProductDetailsTabs } from "./ProductDetailsTabs";
 export { FAQSection } from "./FAQSection";
 export { PreviouslyViewed } from "./PreviouslyViewed";
-export { ShopByReels } from "./ShopByReels";
 export { ProductDetailClient } from "./ProductDetailClient";

@@ -188,7 +188,7 @@ export const ProductGrid = ({
               type="text"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Search for tiles, sanitary ware, products..."
+              placeholder="Search for products..."
               className="w-full pl-12 pr-24 py-3 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white shadow-sm"
             />
             {searchInput && (

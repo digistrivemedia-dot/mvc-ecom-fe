@@ -151,8 +151,6 @@ export const CartProducts = ({
                   size={cartItem.size}
                   quantity={cartItem.quantity}
                   variant={variant}
-                  sqft={(cartItem as any).sqft}
-                  coveragePerBox={(cartItem as any).coveragePerBox}
                 />
               ))}
             </div>
@@ -318,7 +316,7 @@ export const CartProducts = ({
         Your Cart is Empty
       </h1>
       <p className="text-lg text-slate-600 text-center max-w-md">
-        Looks like you haven't added any tiles to your cart yet. Start shopping to find the perfect tiles for your space!
+        Looks like you haven't added anything to your cart yet. Start shopping to find something you'll love!
       </p>
       <Link
         href="/"

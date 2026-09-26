@@ -13,7 +13,7 @@ export const ProductImageGallery = ({ images, productName }: ProductImageGallery
   const [selectedImage, setSelectedImage] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
-  const imageList = images.length > 0 ? images : ["/placeholder-tile.jpg"];
+  const imageList = images.length > 0 ? images : ["/placeholder.jpg"];
 
   const goPrev = () => setSelectedImage((prev) => (prev > 0 ? prev - 1 : prev));
   const goNext = () => setSelectedImage((prev) => (prev < imageList.length - 1 ? prev + 1 : prev));

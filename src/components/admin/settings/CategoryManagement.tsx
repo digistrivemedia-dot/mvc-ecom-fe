@@ -254,7 +254,7 @@ export default function CategoryManagement() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder={formData.parent ? "e.g., Ceramic Tiles" : "e.g., Floor Tiles"}
+                  placeholder={formData.parent ? "e.g., Smartphones" : "e.g., Electronics"}
                 />
                 <p className="text-xs text-slate-500 mt-1">
                   {formData.parent ? "Enter the subcategory name" : "Enter the main category name"}
@@ -267,7 +267,7 @@ export default function CategoryManagement() {
                     💡 <span className="font-medium">Tip:</span> After creating a category, you can add subcategories and sub-subcategories by clicking the <HiPlus className="inline w-4 h-4" /> icon.
                   </p>
                   <p className="text-xs text-slate-500 mt-2">
-                    Example: Floor Tiles → Living Room Tiles → Ceramic Living Room Tiles
+                    Example: Electronics → Audio → Wireless Headphones
                   </p>
                 </div>
               )}

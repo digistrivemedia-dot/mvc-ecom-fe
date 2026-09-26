@@ -98,6 +98,7 @@ export const UpdateProductPricingSchema = z.object({
 
 export const UpdateListingStatusSchema = z.object({
   listingStatus: z.enum(["draft", "pending_approval", "live", "rejected", "paused"]),
+  rejectionNote: z.string().max(500).nullable().optional(),
 });
 
 export type ProductWithVariants = any;

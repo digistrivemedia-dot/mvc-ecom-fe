@@ -29,9 +29,15 @@ async function getPopularProducts() {
 
         console.log(`⭐ Found ${popularProducts.length} popular products`);
 
-        // Randomly shuffle and take 8 products
-        const shuffled = popularProducts.sort(() => 0.5 - Math.random());
-        const selected = shuffled.slice(0, 8);
+        // Randomly shuffle and take 8 products — fall back to the
+        // best-rated products when nothing is tagged 'popular' yet, so the
+        // homepage isn't empty just because tags haven't been set.
+        const selected = popularProducts.length > 0
+            ? popularProducts.sort(() => 0.5 - Math.random()).slice(0, 8)
+            : [...products].sort((a: any, b: any) => {
+                const ratingDiff = (b.ratings || 0) - (a.ratings || 0);
+                return ratingDiff !== 0 ? ratingDiff : (b.numOfReviews || 0) - (a.numOfReviews || 0);
+              }).slice(0, 8);
 
         console.log(`✅ Selected ${selected.length} random popular products`);
 
@@ -46,15 +52,11 @@ async function getPopularProducts() {
             const mappedProduct = {
                 _id: product._id,
                 name: product.name,
-                category: product.category?.name || 'Tiles',
+                category: product.category?.name || 'General',
                 image: product.images?.[0]?.url || '/placeholder.jpg',
                 price: product.price,
                 cuttedPrice: product.cuttedPrice,
                 slug: product.slug || product._id,
-                unit: product.unit,
-                coverage: product.coverage,
-                tilesPerBox: product.tilesPerBox,
-                pricePerSqft: product.pricePerSqft,
                 hasVariants: product.variants && product.variants.length > 1,
                 variantId: product.variants?.[0]?.id || product.id,
                 stripeId: product.stripeId || product.variants?.[0]?.stripeId,
@@ -91,7 +93,7 @@ export const PopularProducts = async () => {
                         Popular Products
                     </h2>
                     <p className="text-slate-600 text-lg">
-                        Customer favorites and best-selling tiles
+                        Customer favorites and best-sellers
                     </p>
                 </div>
                 <div className="text-center py-12 bg-slate-50 rounded-2xl">
@@ -110,7 +112,7 @@ export const PopularProducts = async () => {
                         Popular Products
                     </h2>
                     <p className="text-slate-600 text-lg">
-                        Customer favorites and best-selling tiles
+                        Customer favorites and best-sellers
                     </p>
                 </div>
                 <Link

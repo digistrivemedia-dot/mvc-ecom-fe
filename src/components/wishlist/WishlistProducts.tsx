@@ -66,7 +66,7 @@ export const WishlistProducts = ({
       </h1>
 
       <p className="mb-10 text-slate-500 text-center max-w-md font-light text-lg leading-relaxed">
-        It seems you haven't found any favorites yet. Explore our premium collection to find the perfect tiles for your space.
+        It seems you haven't found any favorites yet. Explore our collection to find something you'll love.
       </p>
 
       <Link

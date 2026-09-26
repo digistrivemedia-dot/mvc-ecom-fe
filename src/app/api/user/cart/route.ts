@@ -58,8 +58,6 @@ export async function POST(request: NextRequest) {
     productId: body.productId,
     quantity: body.quantity || 1,
   };
-  if (body.sqft !== undefined) itemData.sqft = body.sqft;
-  if (body.coveragePerBox !== undefined) itemData.coveragePerBox = body.coveragePerBox;
 
   // Check if item already exists
   const existingItemIndex = items.findIndex(

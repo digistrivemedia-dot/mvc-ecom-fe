@@ -20,7 +20,6 @@ interface FilterSidebarProps {
   selectedTags: string[];
   selectedFinishes: string[];
   selectedColors: string[];
-  selectedRoomTypes: string[];
   selectedSizes: string[];
   minPrice?: number;
   maxPrice?: number;
@@ -115,7 +114,6 @@ export const FilterSidebar = ({
   selectedTags,
   selectedFinishes,
   selectedColors,
-  selectedRoomTypes,
   selectedSizes,
   minPrice: initialMinPrice,
   maxPrice: initialMaxPrice,
@@ -148,7 +146,6 @@ export const FilterSidebar = ({
   const filterOptions = useMemo(() => {
     const finishes = new Map<string, number>();
     const colors = new Map<string, number>();
-    const roomTypes = new Map<string, number>();
     const sizes = new Map<string, number>();
     const tags = new Map<string, number>();
 
@@ -207,7 +204,7 @@ export const FilterSidebar = ({
         colors.set(product.color, (colors.get(product.color) || 0) + 1);
       }
 
-      // Count size from base product (for tiles/sq.ft products that store size as a top-level string)
+      // Count size from base product (for products that store size as a top-level string)
       const productSize = (product as any).size;
       if (productSize) {
         sizes.set(productSize, (sizes.get(productSize) || 0) + 1);
@@ -236,17 +233,6 @@ export const FilterSidebar = ({
                 sizes.set(size, (sizes.get(size) || 0) + 1);
               }
             });
-          }
-        });
-      }
-
-      // Count room types from tags (only specific room type tags)
-      const roomTypeTags = ['kitchen', 'bathroom', 'living-room', 'bedroom', 'outdoor', 'commercial'];
-      if (product.tags && Array.isArray(product.tags)) {
-        product.tags.forEach((tag: string) => {
-          const tagLower = tag.toLowerCase();
-          if (roomTypeTags.includes(tagLower)) {
-            roomTypes.set(tagLower, (roomTypes.get(tagLower) || 0) + 1);
           }
         });
       }
@@ -280,11 +266,6 @@ export const FilterSidebar = ({
       })),
       colors: Array.from(colors.entries()).map(([value, count]) => ({
         label: value.charAt(0).toUpperCase() + value.slice(1),
-        value,
-        count,
-      })),
-      roomTypes: Array.from(roomTypes.entries()).map(([value, count]) => ({
-        label: value.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
         value,
         count,
       })),
@@ -366,7 +347,6 @@ export const FilterSidebar = ({
     ...selectedTags,
     ...selectedFinishes,
     ...selectedColors,
-    ...selectedRoomTypes,
     ...selectedSizes,
     ...(initialMinPrice !== undefined ? ['minPrice'] : []),
     ...(initialMaxPrice !== undefined ? ['maxPrice'] : []),
@@ -519,102 +499,6 @@ export const FilterSidebar = ({
         </div>
       )}
 
-      {/* Shop by Room Filter */}
-      <div className="mb-6 pb-6 border-b border-gray-200">
-        <button
-          onClick={() => toggleSection("Shop by Room")}
-          className="flex items-center justify-between w-full mb-3"
-        >
-          <h3 className="font-semibold text-slate-800">Shop by Room</h3>
-          {openSections.includes("Shop by Room") ? (
-            <FaChevronUp className="text-slate-600 text-sm" />
-          ) : (
-            <FaChevronDown className="text-slate-600 text-sm" />
-          )}
-        </button>
-        {openSections.includes("Shop by Room") && (
-          <div className="grid grid-cols-2 gap-3">
-            {/* Kitchen */}
-            <label className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 hover:bg-amber-50 hover:border-amber-300 transition-all cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={selectedRoomTypes.includes("kitchen")}
-                onChange={(e) => updateFilters('roomType', 'kitchen', e.target.checked)}
-                className="w-4 h-4 text-amber-600 bg-white border-slate-300 rounded focus:ring-2 focus:ring-amber-500 cursor-pointer"
-              />
-              <span className="text-sm font-medium text-slate-700 group-hover:text-amber-700">
-                Kitchen
-              </span>
-            </label>
-
-            {/* Bathroom */}
-            <label className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 hover:bg-cyan-50 hover:border-cyan-300 transition-all cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={selectedRoomTypes.includes("bathroom")}
-                onChange={(e) => updateFilters('roomType', 'bathroom', e.target.checked)}
-                className="w-4 h-4 text-cyan-600 bg-white border-slate-300 rounded focus:ring-2 focus:ring-cyan-500 cursor-pointer"
-              />
-              <span className="text-sm font-medium text-slate-700 group-hover:text-cyan-700">
-                Bathroom
-              </span>
-            </label>
-
-            {/* Living Room */}
-            <label className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 hover:bg-indigo-50 hover:border-indigo-300 transition-all cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={selectedRoomTypes.includes("living-room")}
-                onChange={(e) => updateFilters('roomType', 'living-room', e.target.checked)}
-                className="w-4 h-4 text-indigo-600 bg-white border-slate-300 rounded focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-              />
-              <span className="text-sm font-medium text-slate-700 group-hover:text-indigo-700">
-                Living Room
-              </span>
-            </label>
-
-            {/* Bedroom */}
-            <label className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 hover:bg-violet-50 hover:border-violet-300 transition-all cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={selectedRoomTypes.includes("bedroom")}
-                onChange={(e) => updateFilters('roomType', 'bedroom', e.target.checked)}
-                className="w-4 h-4 text-violet-600 bg-white border-slate-300 rounded focus:ring-2 focus:ring-violet-500 cursor-pointer"
-              />
-              <span className="text-sm font-medium text-slate-700 group-hover:text-violet-700">
-                Bedroom
-              </span>
-            </label>
-
-            {/* Outdoor */}
-            <label className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 hover:bg-emerald-50 hover:border-emerald-300 transition-all cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={selectedRoomTypes.includes("outdoor")}
-                onChange={(e) => updateFilters('roomType', 'outdoor', e.target.checked)}
-                className="w-4 h-4 text-emerald-600 bg-white border-slate-300 rounded focus:ring-2 focus:ring-emerald-500 cursor-pointer"
-              />
-              <span className="text-sm font-medium text-slate-700 group-hover:text-emerald-700">
-                Outdoor
-              </span>
-            </label>
-
-            {/* Commercial */}
-            <label className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 hover:bg-gray-50 hover:border-gray-400 transition-all cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={selectedRoomTypes.includes("commercial")}
-                onChange={(e) => updateFilters('roomType', 'commercial', e.target.checked)}
-                className="w-4 h-4 text-gray-600 bg-white border-slate-300 rounded focus:ring-2 focus:ring-gray-500 cursor-pointer"
-              />
-              <span className="text-sm font-medium text-slate-700 group-hover:text-gray-900">
-                Commercial
-              </span>
-            </label>
-          </div>
-        )}
-      </div>
-
       {/* Finish Filter */}
       {filterOptions.finishes.length > 0 && (
         <div className="mb-6 pb-6 border-b border-gray-200">
@@ -681,46 +565,6 @@ export const FilterSidebar = ({
                       type="checkbox"
                       checked={selectedColors.includes(option.value)}
                       onChange={(e) => updateFilters('color', option.value, e.target.checked)}
-                      className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500 cursor-pointer"
-                    />
-                    <span className="text-sm text-slate-700 group-hover:text-orange-500">
-                      {option.label}
-                    </span>
-                  </div>
-                  <span className="text-xs text-gray-500">({option.count})</span>
-                </label>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Room Type Filter */}
-      {filterOptions.roomTypes.length > 0 && (
-        <div className="mb-6 pb-6 border-b border-gray-200">
-          <button
-            onClick={() => toggleSection("Room Type")}
-            className="flex items-center justify-between w-full mb-3"
-          >
-            <h3 className="font-semibold text-slate-800">Room Type</h3>
-            {openSections.includes("Room Type") ? (
-              <FaChevronUp className="text-slate-600 text-sm" />
-            ) : (
-              <FaChevronDown className="text-slate-600 text-sm" />
-            )}
-          </button>
-          {openSections.includes("Room Type") && (
-            <div className="space-y-2 max-h-64 overflow-y-auto">
-              {filterOptions.roomTypes.map((option) => (
-                <label
-                  key={option.value}
-                  className="flex items-center justify-between cursor-pointer group"
-                >
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={selectedRoomTypes.includes(option.value)}
-                      onChange={(e) => updateFilters('roomType', option.value, e.target.checked)}
                       className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500 cursor-pointer"
                     />
                     <span className="text-sm text-slate-700 group-hover:text-orange-500">

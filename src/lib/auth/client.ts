@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 /**
  * Auth Client for Backend Integration
- * Handles authentication with the tiles e-commerce backend API
+ * Handles authentication with the backend API
  */
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000/api/v1';

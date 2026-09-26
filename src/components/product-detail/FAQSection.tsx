@@ -9,23 +9,23 @@ export const FAQSection = () => {
   const faqs = [
     {
       question: "How do you ensure the quality of your products?",
-      answer: "At InveztIN, every product is sourced directly from trusted manufacturers and undergoes thorough quality checks before reaching our shelves. We partner with leading brands known for precision engineering, durability, and consistent finishes — so you get nothing but the best for your home or project.",
+      answer: "Every product on InveztIN is sourced from vetted vendors and undergoes quality checks before it's listed. We partner with sellers known for reliability and consistent quality — so you get exactly what you ordered.",
     },
     {
-      question: "Do you offer delivery and installation support?",
-      answer: "Yes! We provide doorstep delivery across Bengaluru and surrounding areas. While we don&apos;t offer in-house installation, our team can recommend trusted, experienced installers from our professional network who are familiar with our products and can ensure a flawless finish.",
+      question: "Do you offer delivery support?",
+      answer: "Yes! We provide doorstep delivery to your address. You can track your order status from your account at any time after checkout.",
     },
     {
       question: "What is your return and exchange policy?",
-      answer: "We accept returns or exchanges within 7 days of purchase for unused, unopened products in original packaging. In case of any manufacturing defects, we work directly with the brand to ensure a swift replacement. Please contact our team with your purchase details and we'll sort it out promptly.",
+      answer: "We accept returns or exchanges within 7 days of purchase for unused, unopened products in original packaging. In case of any manufacturing defects, we work directly with the vendor to ensure a swift replacement. Please contact our team with your order details and we'll sort it out promptly.",
     },
     {
-      question: "Can your team help me choose the right products for my project?",
-      answer: "Absolutely! Our in-store design consultants are available at both our Bengaluru branches to guide you through material selection, finish combinations, sizing, and more. Whether you're renovating a bathroom, kitchen, or an entire home, we'll help you find the perfect fit for your style and budget.",
+      question: "Can your team help me choose the right product?",
+      answer: "Absolutely! Reach out via the WhatsApp or Call buttons on any product page or contact our support team, and we'll help you find the right fit for your needs and budget.",
     },
     {
-      question: "Can I visit your showroom to see products in person?",
-      answer: "We strongly encourage a showroom visit — seeing and touching the products in person makes all the difference! Visit us at our Horamavu branch (321/1, 80ft Road, K Channasandra Main Rd) any day of the week. Our friendly staff will walk you through our full range of tiles, sanitary ware, fittings, and more.",
+      question: "How do I get in touch with support?",
+      answer: "You can reach us via the contact details in the footer, or use the WhatsApp or Call buttons on any product page. Our team typically responds within one business day.",
     },
   ];
 

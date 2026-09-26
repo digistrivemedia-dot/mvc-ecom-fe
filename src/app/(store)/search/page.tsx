@@ -6,7 +6,7 @@ import type { ProductWithVariants } from "@/schemas";
 
 export const metadata: Metadata = {
   title: "All Products - InveztIN",
-  description: "Browse our complete collection of premium tiles, sanitary ware, and home improvement products.",
+  description: "Browse our complete collection of products.",
 };
 
 interface SearchProps {
@@ -21,7 +21,6 @@ interface SearchProps {
     size?: string | string[];
     minPrice?: string;
     maxPrice?: string;
-    roomType?: string | string[];
     page?: string;
     limit?: string;
   }>;
@@ -43,7 +42,6 @@ const Search = async ({ searchParams }: SearchProps) => {
   const tags = params.tags ? (Array.isArray(params.tags) ? params.tags : [params.tags]) : [];
   const finishes = params.finish ? (Array.isArray(params.finish) ? params.finish : [params.finish]) : [];
   const colors = params.color ? (Array.isArray(params.color) ? params.color : [params.color]) : [];
-  const roomTypes = params.roomType ? (Array.isArray(params.roomType) ? params.roomType : [params.roomType]) : [];
   const sizes = params.size ? (Array.isArray(params.size) ? params.size : [params.size]) : [];
   const minPrice = params.minPrice ? parseFloat(params.minPrice) : undefined;
   const maxPrice = params.maxPrice ? parseFloat(params.maxPrice) : undefined;
@@ -134,7 +132,7 @@ const Search = async ({ searchParams }: SearchProps) => {
         const brandName = brand?.name || (typeof brand === 'string' ? brand : '');
         if (brandName && brandName.toLowerCase() === slugLower) return true;
 
-        // 4. Fallback: also try brand.name as slug (e.g. "Johnson Tiles" → "johnson-tiles")
+        // 4. Fallback: also try brand.name as slug (e.g. "Acme Co" → "acme-co")
         if (brandName) {
           const brandSlug = brandName.toLowerCase().replace(/\s+/g, '-');
           if (brandSlug === slugLower) return true;
@@ -185,14 +183,6 @@ const Search = async ({ searchParams }: SearchProps) => {
 
       return false;
     });
-  }
-
-  // Filter by room types (stored in tags)
-  if (roomTypes.length > 0) {
-    filteredProducts = filteredProducts.filter((product: ProductWithVariants) =>
-      product.tags && Array.isArray(product.tags) &&
-      roomTypes.some(rt => product.tags.map((t: string) => t.toLowerCase()).includes(rt.toLowerCase()))
-    );
   }
 
   // Filter by sizes — checks variant sizes AND the product-level size field
@@ -274,7 +264,6 @@ const Search = async ({ searchParams }: SearchProps) => {
             selectedTags={tags}
             selectedFinishes={finishes}
             selectedColors={colors}
-            selectedRoomTypes={roomTypes}
             selectedSizes={sizes}
             minPrice={minPrice}
             maxPrice={maxPrice}

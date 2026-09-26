@@ -1,3 +1,5 @@
+import { config } from "@/constants/config";
+
 export default function PrivacyPolicy() {
     return (
         <div className="min-h-screen bg-gray-50 py-12">
@@ -10,9 +12,9 @@ export default function PrivacyPolicy() {
                         <section className="mb-8">
                             <h2 className="text-2xl font-semibold text-slate-800 mb-4">1. Introduction</h2>
                             <p className="text-slate-600 leading-relaxed mb-4">
-                                Welcome to InveztIN. We are committed to protecting your personal information and your right to privacy.
+                                Welcome to {config.appName}. We are committed to protecting your personal information and your right to privacy.
                                 This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website
-                                and purchase our premium tiles and fittings products.
+                                and use our marketplace.
                             </p>
                             <p className="text-slate-600 leading-relaxed">
                                 By using our website, you agree to the collection and use of information in accordance with this policy.
@@ -28,7 +30,7 @@ export default function PrivacyPolicy() {
                             </p>
                             <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4 mb-4">
                                 <li>Register for an account</li>
-                                <li>Place an order for tiles or fittings</li>
+                                <li>Place an order, list a product as a vendor, or fund a product as an investor</li>
                                 <li>Subscribe to our newsletter</li>
                                 <li>Contact our customer support</li>
                                 <li>Participate in surveys or promotions</li>
@@ -56,7 +58,7 @@ export default function PrivacyPolicy() {
                                 We use the information we collect to:
                             </p>
                             <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
-                                <li>Process and fulfill your tile and fitting orders</li>
+                                <li>Process and fulfill your orders</li>
                                 <li>Send order confirmations and shipping updates</li>
                                 <li>Provide customer support and respond to inquiries</li>
                                 <li>Send promotional emails about new products and special offers (with your consent)</li>
@@ -73,7 +75,7 @@ export default function PrivacyPolicy() {
                             </p>
                             <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
                                 <li><strong>Service Providers:</strong> Payment processors, shipping companies, and delivery partners</li>
-                                <li><strong>Business Partners:</strong> Tile manufacturers and suppliers (only when necessary for order fulfillment)</li>
+                                <li><strong>Business Partners:</strong> Vendors and manufacturers (only when necessary for order fulfillment)</li>
                                 <li><strong>Legal Requirements:</strong> When required by law or to protect our rights</li>
                             </ul>
                         </section>
@@ -137,26 +139,9 @@ export default function PrivacyPolicy() {
                                 If you have any questions about this Privacy Policy or our data practices, please contact us:
                             </p>
                             <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-                                <p className="text-slate-700 font-medium mb-3">InveztIN</p>
-
-                                <div className="mb-4">
-                                    <p className="text-slate-700 font-medium text-sm mb-1">Branch 1 - Horamavu</p>
-                                    <p className="text-slate-600 text-sm">321/1, 80 ft road, K Channasandra Main Rd,</p>
-                                    <p className="text-slate-600 text-sm">near canara bank, horamavu post,</p>
-                                    <p className="text-slate-600 text-sm">Kalkere, Bengaluru, Karnataka 560043</p>
-                                    <p className="text-slate-600 text-sm mt-1"><strong>Email:</strong> support@inveztin.com</p>
-                                </div>
-
-                                <div className="mb-3">
-                                    <p className="text-slate-700 font-medium text-sm mb-1">Branch 2 - Yarapanahalli</p>
-                                    <p className="text-slate-600 text-sm">42/13, Yerappanahalli Main Rd,</p>
-                                    <p className="text-slate-600 text-sm">Karnataka D Group Employees Layout,</p>
-                                    <p className="text-slate-600 text-sm">Doddenahalli, Yerappanahalli,</p>
-                                    <p className="text-slate-600 text-sm">Bengaluru, Karnataka 562149</p>
-                                    <p className="text-slate-600 text-sm mt-1"><strong>Email:</strong> support@inveztin.com</p>
-                                </div>
-
-                                <p className="text-slate-600 text-sm"><strong>Phone:</strong> +91 97385 22119</p>
+                                <p className="text-slate-700 font-medium mb-3">{config.appName}</p>
+                                <p className="text-slate-600 text-sm"><strong>Email:</strong> {config.contact.email}</p>
+                                <p className="text-slate-600 text-sm mt-1"><strong>Phone:</strong> {config.contact.phone}</p>
                             </div>
                         </section>
                     </div>

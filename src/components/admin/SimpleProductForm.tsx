@@ -16,7 +16,6 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4
 
 import { colorMapping } from "@/constants/colors";
 import {
-  FINISH_TYPES, MATERIAL_TYPES, Unit,
   MAX_FILE_SIZE, MAX_IMAGES, VALID_IMAGE_TYPES,
 } from "@/constants/productFormOptions";
 import { generateUUID, fileToBase64 } from "@/utils/imageUtils";
@@ -36,7 +35,6 @@ interface Variant {
   productId: string;
   finish: string;
   material: string;
-  unit: string;
   price: string;
   cuttedPrice: string;
   stock: string;
@@ -83,10 +81,6 @@ export function SimpleProductForm() {
     finish: '',
     color: '',
     size: '',
-    unit: 'inches',
-    coverage: '',
-    tilesPerBox: '',
-    pricePerSqft: '',
     price: '',
     cuttedPrice: '',
     stock: '100'
@@ -246,7 +240,6 @@ export function SimpleProductForm() {
       productId: mainFormValues.productId,
       finish: mainFormValues.finish,
       material: mainFormValues.material,
-      unit: mainFormValues.unit,
       price: mainFormValues.price,
       cuttedPrice: mainFormValues.cuttedPrice,
       stock: mainFormValues.stock,
@@ -416,10 +409,6 @@ export function SimpleProductForm() {
       if (finish) requestBody.finish = finish;
       if (color) requestBody.color = color;
       if (size) requestBody.size = size;
-      if (mainFormValues.unit) requestBody.unit = mainFormValues.unit;
-      if (mainFormValues.coverage) requestBody.coverage = Number(mainFormValues.coverage);
-      if (mainFormValues.tilesPerBox) requestBody.tilesPerBox = Number(mainFormValues.tilesPerBox);
-      if (mainFormValues.pricePerSqft) requestBody.pricePerSqft = Number(mainFormValues.pricePerSqft);
 
 
       requestBody.hasVariants = hasVariants;
@@ -441,7 +430,6 @@ export function SimpleProductForm() {
             size: variant.size,
             finish: variant.finish,
             material: variant.material,
-            unit: variant.unit,
             price: variant.price,
             cuttedPrice: variant.cuttedPrice,
             stock: variant.stock,
@@ -505,10 +493,6 @@ export function SimpleProductForm() {
         finish: '',
         color: '',
         size: '',
-        unit: 'inches',
-        coverage: '',
-        tilesPerBox: '',
-        pricePerSqft: '',
         price: '',
         cuttedPrice: '',
         stock: '100'
@@ -599,7 +583,7 @@ export function SimpleProductForm() {
                   <input
                     name="name"
                     required
-                    placeholder="Premium Marble Floor Tiles"
+                    placeholder="Wireless Bluetooth Headphones"
                     value={mainFormValues.name}
                     onChange={(e) => setMainFormValues({ ...mainFormValues, name: e.target.value })}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
@@ -615,7 +599,7 @@ export function SimpleProductForm() {
                     name="description"
                     required
                     rows={4}
-                    placeholder="Elegant marble tiles with luxurious finish..."
+                    placeholder="Comfortable over-ear headphones with noise cancellation..."
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all resize-none"
                   />
                 </div>
@@ -903,19 +887,14 @@ export function SimpleProductForm() {
                     Material
                     <FieldHint kind="customer" />
                   </label>
-                  <select
+                  <input
                     name="material"
+                    type="text"
+                    placeholder="e.g. Cotton, Aluminum, Leather"
                     value={mainFormValues.material}
                     onChange={(e) => setMainFormValues({ ...mainFormValues, material: e.target.value })}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
-                  >
-                    <option value="">Select material</option>
-                    {MATERIAL_TYPES.map((material) => (
-                      <option key={material} value={material}>
-                        {material}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
 
                 <div>
@@ -923,19 +902,14 @@ export function SimpleProductForm() {
                     Finish
                     <FieldHint kind={["customer", "filter"]} />
                   </label>
-                  <select
+                  <input
                     name="finish"
+                    type="text"
+                    placeholder="e.g. Matte, Glossy, Brushed"
                     value={mainFormValues.finish}
                     onChange={(e) => setMainFormValues({ ...mainFormValues, finish: e.target.value })}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
-                  >
-                    <option value="">Select finish</option>
-                    {FINISH_TYPES.map((finish) => (
-                      <option key={finish} value={finish}>
-                        {finish}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
 
                 <div>
@@ -966,81 +940,12 @@ export function SimpleProductForm() {
                   <input
                     name="size"
                     type="text"
-                    placeholder="24x24, 1200x600mm, etc."
+                    placeholder="e.g. Medium, 10x8 inches, 500g"
                     value={mainFormValues.size}
                     onChange={(e) => setMainFormValues({ ...mainFormValues, size: e.target.value })}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
                   />
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Unit</label>
-                  <select
-                    name="unit"
-                    value={mainFormValues.unit}
-                    onChange={(e) => setMainFormValues({ ...mainFormValues, unit: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
-                  >
-                    <option value="">Select unit</option>
-                    {Unit.map((unit) => (
-                      <option key={unit} value={unit}>{unit}</option>
-                    ))}
-                  </select>
-                  <p className="mt-1.5 text-xs text-slate-400">Choosing "Sq.ft" opens the box-coverage fields below — needed for the sq.ft calculator on the product page.</p>
-                </div>
-
-                {mainFormValues.unit === 'Sq.ft' && (
-                  <div className="md:col-span-2 p-5 bg-blue-50 border border-blue-200 rounded-xl grid sm:grid-cols-3 gap-4">
-                    <div className="sm:col-span-3">
-                      <p className="text-sm font-medium text-blue-900">Box / Sq.ft Calculator Fields</p>
-                      <p className="text-xs text-blue-700 mt-0.5">Shown because Unit = Sq.ft. These drive the "how many boxes do I need" calculator on the product page.</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Coverage per Box (Sq.ft)
-                        <span className="ml-1 text-xs text-slate-500">— How many sq.ft does 1 box cover?</span>
-                      </label>
-                      <input
-                        name="coverage"
-                        type="number"
-                        step="0.01"
-                        placeholder="e.g. 8.61"
-                        value={mainFormValues.coverage}
-                        onChange={(e) => setMainFormValues({ ...mainFormValues, coverage: e.target.value })}
-                        className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Tiles per Box
-                        <span className="ml-1 text-xs text-slate-500">— Number of tiles in 1 box</span>
-                      </label>
-                      <input
-                        name="tilesPerBox"
-                        type="number"
-                        placeholder="e.g. 4"
-                        value={mainFormValues.tilesPerBox}
-                        onChange={(e) => setMainFormValues({ ...mainFormValues, tilesPerBox: e.target.value })}
-                        className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Price per Sq.ft (₹)
-                        <span className="ml-1 text-xs text-slate-500">— Display price shown on cards</span>
-                      </label>
-                      <input
-                        name="pricePerSqft"
-                        type="number"
-                        step="0.01"
-                        placeholder="e.g. 145"
-                        value={mainFormValues.pricePerSqft}
-                        onChange={(e) => setMainFormValues({ ...mainFormValues, pricePerSqft: e.target.value })}
-                        className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
-                      />
-                    </div>
-                  </div>
-                )}
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -1132,34 +1037,24 @@ export function SimpleProductForm() {
 
                               <div>
                                 <label className="block text-xs font-medium text-slate-600 mb-1">Material</label>
-                                <select
+                                <input
+                                  type="text"
                                   value={variant.material}
                                   onChange={(e) => updateVariant(variant.id, 'material', e.target.value)}
+                                  placeholder="e.g. Cotton"
                                   className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
-                                >
-                                  <option value="">Select material</option>
-                                  {MATERIAL_TYPES.map((material) => (
-                                    <option key={material} value={material}>
-                                      {material}
-                                    </option>
-                                  ))}
-                                </select>
+                                />
                               </div>
 
                               <div>
                                 <label className="block text-xs font-medium text-slate-600 mb-1">Finish</label>
-                                <select
+                                <input
+                                  type="text"
                                   value={variant.finish}
                                   onChange={(e) => updateVariant(variant.id, 'finish', e.target.value)}
+                                  placeholder="e.g. Matte"
                                   className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
-                                >
-                                  <option value="">Select finish</option>
-                                  {FINISH_TYPES.map((finish) => (
-                                    <option key={finish} value={finish}>
-                                      {finish}
-                                    </option>
-                                  ))}
-                                </select>
+                                />
                               </div>
 
                               <div>
@@ -1184,23 +1079,9 @@ export function SimpleProductForm() {
                                   type="text"
                                   value={variant.size}
                                   onChange={(e) => updateVariant(variant.id, 'size', e.target.value)}
-                                  placeholder="24x24, 12x12..."
+                                  placeholder="e.g. Medium"
                                   className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
                                 />
-                              </div>
-
-                              <div>
-                                <label className="block text-xs font-medium text-slate-600 mb-1">Unit</label>
-                                <select
-                                  value={variant.unit}
-                                  onChange={(e) => updateVariant(variant.id, 'unit', e.target.value)}
-                                  className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
-                                >
-                                  <option value="">Select unit</option>
-                                  {Unit.map((unit) => (
-                                    <option key={unit} value={unit}>{unit}</option>
-                                  ))}
-                                </select>
                               </div>
 
                               <div>
@@ -1464,16 +1345,16 @@ export function SimpleProductForm() {
             </AccordionContent>
           </AccordionItem>
 
-          {/* 8. Badges & Room Types */}
+          {/* 8. Badges */}
           <AccordionItem value="tags" className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
             <AccordionTrigger className="px-8 py-6 hover:no-underline hover:bg-slate-50 transition-colors">
               <div className="text-left">
                 <h2 className="text-xl font-medium text-slate-900 flex items-center flex-wrap">
-                  Badges & Room Types
+                  Badges
                   <span className="ml-2 text-xs font-normal text-slate-400">(optional)</span>
                   <FieldHint kind={["customer", "filter"]} />
                 </h2>
-                <p className="text-sm text-slate-500 mt-1 font-normal">Badges show directly on the product card (e.g. "New", "Best Seller"). Room types add this product to those search filters.</p>
+                <p className="text-sm text-slate-500 mt-1 font-normal">Badges show directly on the product card (e.g. "New", "Best Seller") and add this product to those search filters.</p>
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-8 pb-8">
@@ -1583,90 +1464,6 @@ export function SimpleProductForm() {
                 <p className="text-xs text-slate-500 mt-4">
                   Selected tags will appear as badges on the product card for better visibility
                 </p>
-
-                <div className="mt-8 pt-8 border-t border-slate-200">
-                  <label className="block text-sm font-medium text-slate-700 mb-4">
-                    Applications (Room Types)
-                  </label>
-
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <label className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200 hover:bg-amber-50 hover:border-amber-300 transition-all cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        name="tags"
-                        value="kitchen"
-                        className="w-4 h-4 text-amber-600 bg-white border-slate-300 rounded focus:ring-2 focus:ring-amber-500 cursor-pointer"
-                      />
-                      <span className="text-sm font-medium text-slate-700 group-hover:text-amber-700">
-                        🍳 Kitchen
-                      </span>
-                    </label>
-
-                    <label className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200 hover:bg-cyan-50 hover:border-cyan-300 transition-all cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        name="tags"
-                        value="bathroom"
-                        className="w-4 h-4 text-cyan-600 bg-white border-slate-300 rounded focus:ring-2 focus:ring-cyan-500 cursor-pointer"
-                      />
-                      <span className="text-sm font-medium text-slate-700 group-hover:text-cyan-700">
-                        🚿 Bathroom
-                      </span>
-                    </label>
-
-                    <label className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200 hover:bg-indigo-50 hover:border-indigo-300 transition-all cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        name="tags"
-                        value="living-room"
-                        className="w-4 h-4 text-indigo-600 bg-white border-slate-300 rounded focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-                      />
-                      <span className="text-sm font-medium text-slate-700 group-hover:text-indigo-700">
-                        🛋️ Living Room
-                      </span>
-                    </label>
-
-                    <label className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200 hover:bg-violet-50 hover:border-violet-300 transition-all cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        name="tags"
-                        value="bedroom"
-                        className="w-4 h-4 text-violet-600 bg-white border-slate-300 rounded focus:ring-2 focus:ring-violet-500 cursor-pointer"
-                      />
-                      <span className="text-sm font-medium text-slate-700 group-hover:text-violet-700">
-                        🛏️ Bedroom
-                      </span>
-                    </label>
-
-                    <label className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200 hover:bg-emerald-50 hover:border-emerald-300 transition-all cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        name="tags"
-                        value="outdoor"
-                        className="w-4 h-4 text-emerald-600 bg-white border-slate-300 rounded focus:ring-2 focus:ring-emerald-500 cursor-pointer"
-                      />
-                      <span className="text-sm font-medium text-slate-700 group-hover:text-emerald-700">
-                        🌳 Outdoor
-                      </span>
-                    </label>
-
-                    <label className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200 hover:bg-gray-50 hover:border-gray-400 transition-all cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        name="tags"
-                        value="commercial"
-                        className="w-4 h-4 text-gray-600 bg-white border-slate-300 rounded focus:ring-2 focus:ring-gray-500 cursor-pointer"
-                      />
-                      <span className="text-sm font-medium text-slate-700 group-hover:text-gray-900">
-                        🏢 Commercial
-                      </span>
-                    </label>
-                  </div>
-
-                  <p className="text-xs text-slate-500 mt-4">
-                    Select room types where this product can be used
-                  </p>
-                </div>
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -1712,9 +1509,6 @@ export function SimpleProductForm() {
             imageUrl={previewImage}
             price={Number(mainFormValues.price) || 0}
             cuttedPrice={Number(mainFormValues.cuttedPrice) || undefined}
-            unit={mainFormValues.unit}
-            pricePerSqft={Number(mainFormValues.pricePerSqft) || undefined}
-            coverage={Number(mainFormValues.coverage) || undefined}
             variantCount={hasVariants ? variants.length : 0}
           />
           <p className="text-xs text-slate-400 mt-3 text-center">This is what customers will see on the product card.</p>

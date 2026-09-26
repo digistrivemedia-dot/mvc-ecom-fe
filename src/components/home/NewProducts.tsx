@@ -29,23 +29,23 @@ async function getNewProducts() {
 
         console.log(`✨ Found ${newProducts.length} new products`);
 
-        // Randomly shuffle and take 8 products
-        const shuffled = newProducts.sort(() => 0.5 - Math.random());
-        const selected = shuffled.slice(0, 8);
+        // Randomly shuffle and take 8 products — fall back to the most
+        // recently added products when nothing is tagged 'new' yet (this is
+        // literally what "new" means, so it doubles as the natural default).
+        const selected = newProducts.length > 0
+            ? newProducts.sort(() => 0.5 - Math.random()).slice(0, 8)
+            : [...products].sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 8);
 
         console.log(`✅ Selected ${selected.length} random new products`);
 
         return selected.map((product: any) => ({
             _id: product._id,
             name: product.name,
-            category: product.category?.name || 'Tiles',
+            category: product.category?.name || 'General',
             image: product.images?.[0]?.url || '/placeholder.jpg',
             price: product.price,
             cuttedPrice: product.cuttedPrice,
             slug: product.slug || product._id,
-            unit: product.unit,
-            coverage: product.coverage,
-            tilesPerBox: product.tilesPerBox,
             hasVariants: product.variants && product.variants.length > 1,
             variantId: product.variants?.[0]?.id || product.id,
             stripeId: product.stripeId || product.variants?.[0]?.stripeId,
@@ -69,7 +69,7 @@ export const NewProducts = async () => {
                         New Products
                     </h2>
                     <p className="text-slate-600 text-lg">
-                        Fresh arrivals and latest tile collections
+                        Fresh arrivals and latest collections
                     </p>
                 </div>
                 <div className="text-center py-12 bg-slate-50 rounded-2xl">
@@ -88,7 +88,7 @@ export const NewProducts = async () => {
                         New Products
                     </h2>
                     <p className="text-slate-600 text-lg">
-                        Fresh arrivals and latest tile collections
+                        Fresh arrivals and latest collections
                     </p>
                 </div>
                 <Link

@@ -23,9 +23,6 @@ function mapToProductItemShape(p: any) {
     cuttedPrice: p.cuttedPrice,
     category: p.category?.slug || p.category?._id || p.category,
     variants: p.variants || [],
-    unit: p.unit,
-    coverage: p.coverage,
-    pricePerSqft: p.pricePerSqft,
     tags: p.tags,
     shortDescription: p.shortDescription,
   };

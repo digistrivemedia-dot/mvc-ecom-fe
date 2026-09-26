@@ -1,8 +1,4 @@
-export { HeroBanner } from "./HeroBanner";
 export { HeroSlider } from "./HeroSlider";
-export { CollectionGrid } from "./CollectionGrid";
-export { BrowseByColor } from "./BrowseByColor";
-export { Testimonials } from "./Testimonials";
 export { PopularProducts } from "./PopularProducts";
 export { TrendingProducts } from "./TrendingProducts";
 export { NewProducts } from "./NewProducts";

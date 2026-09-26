@@ -57,7 +57,7 @@ const Register = () => {
           <h1 className="text-2xl md:text-3xl font-light text-white mb-1 tracking-wide">
             Create Account
           </h1>
-          <p className="text-gray-500 text-xs font-light tracking-wide">Join us to explore premium tiles</p>
+          <p className="text-gray-500 text-xs font-light tracking-wide">Join us and start exploring</p>
         </div>
 
         {/* Form Card */}

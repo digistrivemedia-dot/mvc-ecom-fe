@@ -40,7 +40,7 @@ export default async function GalleryPage() {
             Product Gallery
           </h1>
           <p className="text-lg text-slate-600">
-            Browse our complete collection of premium tiles
+            Browse our complete product collection
           </p>
         </div>
 
@@ -58,7 +58,7 @@ export default async function GalleryPage() {
               return (
                 <Link
                   key={product._id}
-                  href={`/${product.category?.slug || 'tiles'}/${product._id}`}
+                  href={`/${product.category?.slug || 'products'}/${product._id}`}
                   className="group relative aspect-square overflow-hidden rounded-lg bg-gray-100 hover:shadow-xl transition-all duration-300"
                 >
                   <Image

@@ -14,10 +14,6 @@ const WishlistButton = dynamic(
   () => import("../wishlist/WishlistButton")
 );
 
-const EnquiryModal = dynamic(
-  () => import("../product-detail/EnquiryModal").then((mod) => ({ default: mod.EnquiryModal }))
-);
-
 interface ProductItemProps {
   product: ProductWithVariants;
   /** 'investor' swaps the bottom CTA for a quantity stepper + Add to Invest Cart (see /investor/products). */
@@ -42,16 +38,11 @@ const tagConfig: Record<string, { color: string; emoji: string }> = {
 export const ProductItem = ({ product, variant = "customer", investorPrice, remainingUnits, onAddToInvestCart }: ProductItemProps) => {
   const { name, id, img, price, category, variants } = product;
   const cuttedPrice = (product as any).cuttedPrice;
-  const unit: string = (product as any).unit || '';
-  const coverage: number = (product as any).coverage || 0;
-  const pricePerSqft: number = (product as any).pricePerSqft || 0;
-  const isSqftProduct = unit === 'Sq.ft' && coverage > 0;
   const tags: string[] = (product as any).tags || [];
   const shortDescription = (product as any).shortDescription || (product as any).description || "";
   const discount = price > 0 && cuttedPrice > price
     ? Math.round(((cuttedPrice - price) / cuttedPrice) * 100)
     : 0;
-  const [isEnquiryOpen, setIsEnquiryOpen] = useState(false);
   const maxQuantity = Math.max(remainingUnits ?? 0, 0);
   const [investQuantity, setInvestQuantity] = useState(1);
 
@@ -84,20 +75,6 @@ export const ProductItem = ({ product, variant = "customer", investorPrice, rema
           <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
         </div>
 
-        {/* Enquire Button - Overlay on Image (Top Left) */}
-        <div className="absolute top-3 left-3 z-10">
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setIsEnquiryOpen(true);
-            }}
-            className="px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-300 text-xs font-semibold shadow-lg"
-          >
-            Enquire Now
-          </button>
-        </div>
-
         {/* Discount Badge */}
         {discount > 0 && (
           <div className="absolute bottom-3 left-3 z-10">
@@ -127,27 +104,12 @@ export const ProductItem = ({ product, variant = "customer", investorPrice, rema
         <div className="flex items-center justify-between mt-3">
           <div>
             {price > 0 ? (
-              <>
-                {isSqftProduct && pricePerSqft > 0 ? (
-                  <div className="flex items-baseline gap-2">
-                    <p className="text-xl font-bold text-orange-500">₹{pricePerSqft.toFixed(0)}</p>
-                    <p className="text-xs text-gray-500">/ sq.ft</p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex items-baseline gap-2">
-                      <p className="text-xl font-bold text-orange-500">₹{price.toFixed(0)}</p>
-                      {cuttedPrice > price && (
-                        <p className="text-sm text-gray-400 line-through">₹{cuttedPrice.toFixed(0)}</p>
-                      )}
-                    </div>
-                    <p className="text-xs text-gray-500">per {unit === 'Sq.ft' ? 'box' : (unit || 'unit')}</p>
-                    {isSqftProduct && (
-                      <p className="text-xs text-orange-500 font-medium">{coverage} Sq.ft/box</p>
-                    )}
-                  </>
+              <div className="flex items-baseline gap-2">
+                <p className="text-xl font-bold text-orange-500">₹{price.toFixed(0)}</p>
+                {cuttedPrice > price && (
+                  <p className="text-sm text-gray-400 line-through">₹{cuttedPrice.toFixed(0)}</p>
                 )}
-              </>
+              </div>
             ) : (
               <>
                 <p className="text-base font-semibold text-blue-600">Get Price</p>
@@ -253,21 +215,6 @@ export const ProductItem = ({ product, variant = "customer", investorPrice, rema
           </Link>
         )}
       </div>
-
-      {/* Enquiry Modal */}
-      <EnquiryModal
-        isOpen={isEnquiryOpen}
-        onClose={() => setIsEnquiryOpen(false)}
-        product={{
-          id: id,
-          name: name,
-          price: price,
-          img: img,
-          unit: (product as any).unit,
-          coverage: (product as any).coverage,
-          tilesPerBox: (product as any).tilesPerBox,
-        }}
-      />
     </div>
   );
 };

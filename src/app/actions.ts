@@ -19,7 +19,6 @@ function transformProduct(backendProduct: any) {
   const mainImage = featuredImage || backendProduct.images?.[0];
 
   // Transform variants - use real variants if available, otherwise create default
-  // NOTE: The DB schema uses a simple `size` string field (e.g. "24x24"), not a `dimensions` object.
   let variants = [];
   if (backendProduct.hasVariants && backendProduct.variants && backendProduct.variants.length > 0) {
     variants = backendProduct.variants.map((variant: any) => {
@@ -65,27 +64,14 @@ function transformProduct(backendProduct: any) {
     subcategoryName: backendProduct.subcategory?.name,
     img: mainImage?.url || '/placeholder.jpg',
     images: backendProduct.images || [],
-    brand: backendProduct.brand,
     stock: backendProduct.stock,
-    warranty: backendProduct.warranty,
     ratings: backendProduct.ratings || 0,
     numOfReviews: backendProduct.numOfReviews || 0,
-    // Tiles-specific fields
     productId: backendProduct.productId,
     size: backendProduct.size,
-    unit: backendProduct.unit,
     material: backendProduct.material,
     finish: backendProduct.finish,
     color: backendProduct.color,
-    dimensions: backendProduct.dimensions,
-    roomType: backendProduct.roomType,
-    thickness: backendProduct.thickness,
-    coverage: backendProduct.coverage,
-    tilesPerBox: backendProduct.tilesPerBox,
-    pricePerSqft: backendProduct.pricePerSqft,
-    weight: backendProduct.weight,
-    waterAbsorption: backendProduct.waterAbsorption,
-    slipResistance: backendProduct.slipResistance,
     highlights: backendProduct.highlights || [],
     careInstructions: backendProduct.careInstructions || [],
     specifications: backendProduct.specifications || [],

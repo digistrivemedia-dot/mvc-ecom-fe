@@ -16,9 +16,9 @@ interface Product {
   shortDescription?: string;
   price: number;
   cuttedPrice: number;
-  pricePerSqft?: number;
   vendorPrice?: number;
   listingStatus?: 'draft' | 'pending_approval' | 'live' | 'rejected' | 'paused';
+  rejectionNote?: string | null;
   pricingStatus?: 'pending_pricing' | 'priced';
   productId?: string;
   category: {
@@ -81,6 +81,12 @@ export default function AdminProductsPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [successTimeoutId, setSuccessTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
+  // Listing approval state
+  const [approvalLoading, setApprovalLoading] = useState<string | null>(null);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [productToReject, setProductToReject] = useState<{ id: string; name: string } | null>(null);
+  const [rejectionNoteInput, setRejectionNoteInput] = useState("");
+
   // CSV export/import state
   const [csvExporting, setCsvExporting] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
@@ -100,6 +106,7 @@ export default function AdminProductsPage() {
   const [totalProducts, setTotalProducts] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(12);
   const [totalPages, setTotalPages] = useState(1);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'live' | 'pending_approval' | 'rejected'>('live');
 
   useEffect(() => {
     fetchProducts();
@@ -110,7 +117,7 @@ export default function AdminProductsPage() {
         clearTimeout(successTimeoutId);
       }
     };
-  }, [searchQuery, currentPage, itemsPerPage]);
+  }, [searchQuery, currentPage, itemsPerPage, statusFilter]);
 
   const fetchProducts = async () => {
     try {
@@ -130,6 +137,15 @@ export default function AdminProductsPage() {
 
       if (result.success) {
         let allProducts = result.products || [];
+
+        // Client-side filtering by approval status
+        if (statusFilter !== 'all') {
+          allProducts = allProducts.filter((product: Product) =>
+            statusFilter === 'live'
+              ? (product.listingStatus ?? 'live') === 'live'
+              : product.listingStatus === statusFilter
+          );
+        }
 
         // Client-side filtering by search query
         if (searchQuery) {
@@ -230,7 +246,7 @@ export default function AdminProductsPage() {
       const headers = [
         'type', '_id', 'name', 'productId', 'variant_index',
         'variant_color', 'variant_size', 'price', 'cuttedPrice',
-        'pricePerSqft', 'stock', 'category_name'
+        'stock', 'category_name'
       ];
 
       const rows: string[] = [headers.join(',')];
@@ -247,7 +263,6 @@ export default function AdminProductsPage() {
           '', // variant_size
           escapeCsvField(p.price),
           escapeCsvField(p.cuttedPrice || ''),
-          escapeCsvField(p.pricePerSqft || ''),
           escapeCsvField(p.stock),
           escapeCsvField(p.category?.name || ''),
         ].join(','));
@@ -265,7 +280,6 @@ export default function AdminProductsPage() {
               escapeCsvField(v.size || ''),
               escapeCsvField(v.price ?? ''),
               escapeCsvField(v.cuttedPrice ?? ''),
-              '', // pricePerSqft not applicable for variants
               escapeCsvField(v.stock ?? ''),
               escapeCsvField(p.category?.name || ''),
             ].join(','));
@@ -367,9 +381,9 @@ export default function AdminProductsPage() {
 
       const getColIndex = (name: string) => headers.indexOf(name);
 
-      const editableProductFields = ['price', 'cuttedPrice', 'pricePerSqft', 'stock'];
+      const editableProductFields = ['price', 'cuttedPrice', 'stock'];
       const editableVariantFields = ['price', 'cuttedPrice', 'stock'];
-      const numericFields = ['price', 'cuttedPrice', 'pricePerSqft', 'stock'];
+      const numericFields = ['price', 'cuttedPrice', 'stock'];
 
       const changes: CsvChange[] = [];
 
@@ -450,7 +464,7 @@ export default function AdminProductsPage() {
       }
 
       if (changes.length === 0) {
-        setCsvParseError('No changes detected. Make sure you edited the price, cuttedPrice, pricePerSqft, or stock columns.');
+        setCsvParseError('No changes detected. Make sure you edited the price, cuttedPrice, or stock columns.');
         return;
       }
 
@@ -599,6 +613,71 @@ export default function AdminProductsPage() {
     }
   };
 
+  // ── Listing approval handlers ──
+
+  const updateListingStatus = async (productId: string, listingStatus: string, rejectionNote?: string) => {
+    const token = localStorage.getItem('auth_token');
+    const response = await fetch(`${API_BASE_URL}/admin/product/${productId}/listing-status`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      credentials: 'include',
+      body: JSON.stringify({ listingStatus, rejectionNote: rejectionNote ?? null }),
+    });
+
+    const result = await response.json();
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to update listing status');
+    }
+    return result.product;
+  };
+
+  const handleApprove = async (productId: string, productName: string) => {
+    setApprovalLoading(productId);
+    try {
+      await updateListingStatus(productId, 'live');
+      showSuccessMessage(`"${productName}" approved and is now live!`);
+      fetchProducts();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to approve product');
+    } finally {
+      setApprovalLoading(null);
+    }
+  };
+
+  const openRejectModal = (productId: string, productName: string) => {
+    setProductToReject({ id: productId, name: productName });
+    setRejectionNoteInput("");
+    setShowRejectModal(true);
+  };
+
+  const closeRejectModal = () => {
+    setShowRejectModal(false);
+    setProductToReject(null);
+    setRejectionNoteInput("");
+  };
+
+  const confirmReject = async () => {
+    if (!productToReject) return;
+
+    setApprovalLoading(productToReject.id);
+    setShowRejectModal(false);
+
+    try {
+      await updateListingStatus(productToReject.id, 'rejected', rejectionNoteInput.trim() || undefined);
+      showSuccessMessage(`"${productToReject.name}" rejected.`);
+      fetchProducts();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to reject product');
+    } finally {
+      setApprovalLoading(null);
+      setProductToReject(null);
+      setRejectionNoteInput("");
+    }
+  };
+
   // Search handlers
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -620,6 +699,11 @@ export default function AdminProductsPage() {
   const handleItemsPerPageChange = (value: number) => {
     setItemsPerPage(value);
     setCurrentPage(1); // Reset to page 1 when changing items per page
+  };
+
+  const handleStatusFilterChange = (value: 'all' | 'live' | 'pending_approval' | 'rejected') => {
+    setStatusFilter(value);
+    setCurrentPage(1); // Reset to page 1 when changing the status filter
   };
 
   // Generate page numbers to display
@@ -660,7 +744,6 @@ export default function AdminProductsPage() {
     const labels: Record<string, string> = {
       price: 'Price',
       cuttedPrice: 'MRP',
-      pricePerSqft: 'Price/Sq.ft',
       stock: 'Stock',
     };
     return labels[field] || field;
@@ -668,7 +751,7 @@ export default function AdminProductsPage() {
 
   const formatValue = (field: string, value: number | string) => {
     if (value === '' || value === null || value === undefined) return '—';
-    if (['price', 'cuttedPrice', 'pricePerSqft'].includes(field)) {
+    if (['price', 'cuttedPrice'].includes(field)) {
       return `₹${Number(value).toLocaleString('en-IN')}`;
     }
     return String(value);
@@ -692,7 +775,7 @@ export default function AdminProductsPage() {
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Products Management</h1>
           <p className="text-slate-600 mt-1">
-            Manage all your tile products and inventory ({totalProducts} products)
+            Manage all your products and inventory ({totalProducts} products)
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -755,6 +838,31 @@ export default function AdminProductsPage() {
         </form>
       </div>
 
+      {/* Approval Status Filter */}
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-slate-600 font-medium whitespace-nowrap">Status:</span>
+        <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg p-1 shadow-sm">
+          {([
+            { value: 'all', label: 'All' },
+            { value: 'live', label: 'Approved' },
+            { value: 'pending_approval', label: 'Pending' },
+            { value: 'rejected', label: 'Rejected' },
+          ] as const).map((option) => (
+            <button
+              key={option.value}
+              onClick={() => handleStatusFilterChange(option.value)}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 ${
+                statusFilter === option.value
+                  ? "bg-orange-500 text-white shadow-sm"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Items Per Page Selector */}
       <div className="flex items-center gap-2">
         <span className="text-sm text-slate-600 font-medium whitespace-nowrap">Show:</span>
@@ -789,12 +897,20 @@ export default function AdminProductsPage() {
           <div className="text-center py-20">
             <HiShoppingBag className="w-20 h-20 text-slate-300 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-slate-900 mb-2">
-              {searchQuery ? 'No Products Found' : 'No Products Yet'}
+              {searchQuery
+                ? 'No Products Found'
+                : statusFilter !== 'all'
+                ? `No ${statusFilter === 'live' ? 'Approved' : statusFilter === 'pending_approval' ? 'Pending' : 'Rejected'} Products`
+                : 'No Products Yet'}
             </h3>
             <p className="text-slate-600 mb-6">
-              {searchQuery ? 'Try adjusting your search terms' : 'Start adding products to your tile inventory'}
+              {searchQuery
+                ? 'Try adjusting your search terms'
+                : statusFilter !== 'all'
+                ? 'Try a different status filter above.'
+                : 'Start adding products to your inventory'}
             </p>
-            {!searchQuery && (
+            {!searchQuery && statusFilter === 'all' && (
               <Link
                 href="/admin/products/create"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
@@ -948,8 +1064,16 @@ export default function AdminProductsPage() {
                     )}
                   </div>
 
+                  {/* Rejection note — shown to admin so they remember why it was rejected */}
+                  {product.listingStatus === 'rejected' && product.rejectionNote && (
+                    <div className="mb-3 px-3 py-2 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-xs font-medium text-red-700 mb-0.5">Rejection reason</p>
+                      <p className="text-xs text-red-600">{product.rejectionNote}</p>
+                    </div>
+                  )}
+
                   {/* Action Buttons */}
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 mb-2">
                     <Link
                       href={`/admin/products/${product._id}/edit`}
                       className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-orange-500 hover:text-white transition-colors"
@@ -975,6 +1099,28 @@ export default function AdminProductsPage() {
                       )}
                     </button>
                   </div>
+
+                  {/* Approve/Reject — only for listings still needing a decision. Already-live (approved) listings don't show these. */}
+                  {product.listingStatus !== 'live' && (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleApprove(product._id, product.name)}
+                        disabled={approvalLoading === product._id}
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <FiCheck className="w-4 h-4" />
+                        <span className="font-medium">{approvalLoading === product._id ? 'Approving...' : 'Approve'}</span>
+                      </button>
+                      <button
+                        onClick={() => openRejectModal(product._id, product.name)}
+                        disabled={approvalLoading === product._id || product.listingStatus === 'rejected'}
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <FiX className="w-4 h-4" />
+                        <span className="font-medium">Reject</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -1078,6 +1224,54 @@ export default function AdminProductsPage() {
         </div>
       )}
 
+      {/* Reject Listing Modal */}
+      {showRejectModal && productToReject && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all animate-slideUp">
+            <div className="p-6">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FiX className="w-8 h-8 text-red-600" />
+              </div>
+
+              <h3 className="text-2xl font-bold text-slate-900 text-center mb-2">
+                Reject Product?
+              </h3>
+
+              <p className="text-slate-600 text-center mb-4">
+                Rejecting <span className="font-semibold text-slate-900">&quot;{productToReject.name}&quot;</span> will hide it from customers. The vendor will see this listing marked as rejected.
+              </p>
+
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Reason for the vendor (optional)
+              </label>
+              <textarea
+                value={rejectionNoteInput}
+                onChange={(e) => setRejectionNoteInput(e.target.value)}
+                maxLength={500}
+                rows={3}
+                placeholder="e.g. Product photos are blurry, please re-upload clearer images."
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all mb-6 resize-none"
+              />
+
+              <div className="flex gap-3">
+                <button
+                  onClick={closeRejectModal}
+                  className="flex-1 py-3 px-4 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmReject}
+                  className="flex-1 py-3 px-4 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-medium shadow-lg hover:shadow-xl"
+                >
+                  Reject
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* CSV Import Modal */}
       {showImportModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -1130,7 +1324,7 @@ export default function AdminProductsPage() {
                 /* Upload Step */
                 <div>
                   <p className="text-sm text-slate-600 mb-4">
-                    Export your products CSV first, edit the <strong>price</strong>, <strong>cuttedPrice</strong>, <strong>pricePerSqft</strong>, or <strong>stock</strong> columns, then upload the edited file here.
+                    Export your products CSV first, edit the <strong>price</strong>, <strong>cuttedPrice</strong>, or <strong>stock</strong> columns, then upload the edited file here.
                   </p>
 
                   {/* Drag & Drop Zone */}

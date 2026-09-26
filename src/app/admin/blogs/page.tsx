@@ -36,7 +36,7 @@ interface Blog {
 }
 
 const BLOG_CATEGORIES = [
-  'Tile Trends',
+  'Product Trends',
   'Installation Tips',
   'Design Ideas',
   'Maintenance Guide',
@@ -74,7 +74,7 @@ export default function BlogsPage() {
     content: '',
     featuredImage: '',
     author: 'Admin',
-    category: 'Tile Trends',
+    category: 'Product Trends',
     tags: [] as string[],
     status: 'draft' as 'draft' | 'published',
   });
@@ -168,7 +168,7 @@ export default function BlogsPage() {
         content: '',
         featuredImage: '',
         author: 'Admin',
-        category: 'Tile Trends',
+        category: 'Product Trends',
         tags: [],
         status: 'draft',
       });

@@ -6,9 +6,6 @@ interface ProductPreviewCardProps {
   imageUrl?: string;
   price: number;
   cuttedPrice?: number;
-  unit?: string;
-  pricePerSqft?: number;
-  coverage?: number;
   tags?: string[];
   variantCount?: number;
 }
@@ -25,13 +22,9 @@ export function ProductPreviewCard({
   imageUrl,
   price,
   cuttedPrice,
-  unit,
-  pricePerSqft,
-  coverage,
   tags = [],
   variantCount = 0,
 }: ProductPreviewCardProps) {
-  const isSqftProduct = unit === "Sq.ft" && (coverage ?? 0) > 0;
   const discount =
     price > 0 && cuttedPrice && cuttedPrice > price
       ? Math.round(((cuttedPrice - price) / cuttedPrice) * 100)
@@ -61,18 +54,9 @@ export function ProductPreviewCard({
         </h3>
 
         <div className="flex items-baseline gap-2">
-          {isSqftProduct && pricePerSqft ? (
-            <>
-              <p className="text-xl font-bold text-orange-500">₹{pricePerSqft}</p>
-              <p className="text-xs text-gray-500">/ sq.ft</p>
-            </>
-          ) : (
-            <>
-              <p className="text-xl font-bold text-orange-500">₹{price || 0}</p>
-              {cuttedPrice && cuttedPrice > price && (
-                <p className="text-sm text-gray-400 line-through">₹{cuttedPrice}</p>
-              )}
-            </>
+          <p className="text-xl font-bold text-orange-500">₹{price || 0}</p>
+          {cuttedPrice && cuttedPrice > price && (
+            <p className="text-sm text-gray-400 line-through">₹{cuttedPrice}</p>
           )}
         </div>
 

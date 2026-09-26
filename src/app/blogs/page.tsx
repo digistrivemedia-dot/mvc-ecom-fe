@@ -22,7 +22,7 @@ interface Blog {
 
 const BLOG_CATEGORIES = [
   'All',
-  'Tile Trends',
+  'Product Trends',
   'Installation Tips',
   'Design Ideas',
   'Maintenance Guide',
@@ -98,7 +98,7 @@ export default function BlogsPage() {
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
-      'Tile Trends': 'bg-purple-500',
+      'Product Trends': 'bg-purple-500',
       'Installation Tips': 'bg-blue-500',
       'Design Ideas': 'bg-green-500',
       'Maintenance Guide': 'bg-yellow-500',
@@ -134,7 +134,7 @@ export default function BlogsPage() {
               InveztIN blogs 
             </h1>
             <p className="text-xl text-slate-300 mb-10 leading-relaxed">
-              Expert advice, design inspiration, and the latest trends in tile design
+              Expert advice, buying guides, and the latest product trends
             </p>
 
             {/* Search Bar - More Refined */}

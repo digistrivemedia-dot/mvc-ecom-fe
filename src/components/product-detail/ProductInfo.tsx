@@ -6,7 +6,7 @@ import { useWishlistMutation } from "@/hooks/wishlist";
 import { useSession } from "@/lib/auth/client";
 import { toast } from "sonner";
 import type { ProductWithVariants } from "@/schemas";
-import { EnquiryModal } from "./EnquiryModal";
+import { config } from "@/constants/config";
 
 interface ProductInfoProps {
   product: ProductWithVariants;
@@ -27,14 +27,10 @@ export const ProductInfo = ({ product, onVariantChange }: ProductInfoProps) => {
     product.finish || product.variants[0]?.finish || ""
   );
   const [quantity, setQuantity] = useState(1);
-  const [sqftInput, setSqftInput] = useState('');
-  const [boxesInput, setBoxesInput] = useState('');
-  const [lastEdited, setLastEdited] = useState<'sqft' | 'boxes'>('sqft');
 
   const { data: session } = useSession();
   const { add: addToCart, isAdding } = useCartMutation();
   const { add: addToWishlist, isAddingToWishlist } = useWishlistMutation();
-  const [isEnquiryModalOpen, setIsEnquiryModalOpen] = useState(false);
 
   // FIXED: Include main product as the first "variant" option
   const allVariantOptions = useMemo(() => {
@@ -125,49 +121,13 @@ export const ProductInfo = ({ product, onVariantChange }: ProductInfoProps) => {
   const currentStock = selectedVariant?.stock || product.stock;
   const currentMRP = selectedVariant?.cuttedPrice || product.cuttedPrice;
 
-  // Sq.ft calculator logic — only active when unit is Sq.ft and coverage is set
-  const coveragePerBox: number = product.coverage || 0;
-  const isSqftProduct = product.unit === 'Sq.ft' && coveragePerBox > 0;
-
-  // Dual-mode calculator:
-  // 'sqft' mode — user typed sq.ft, waste is applied, boxes are calculated
-  // 'boxes' mode — user typed boxes directly, no waste re-applied
-  const sqftNum = parseFloat(sqftInput) || 0;
-  const boxesNum = parseInt(boxesInput) || 0;
-  const hasInput = (lastEdited === 'sqft' && sqftNum > 0) || (lastEdited === 'boxes' && boxesNum > 0);
-
-  let boxesNeeded: number;
-  let actualCoverage: number;
-
-  if (lastEdited === 'sqft' && sqftNum > 0) {
-    boxesNeeded = Math.max(1, Math.ceil(sqftNum / coveragePerBox));
-    actualCoverage = boxesNeeded * coveragePerBox;
-  } else if (lastEdited === 'boxes' && boxesNum > 0) {
-    boxesNeeded = Math.max(1, boxesNum);
-    actualCoverage = boxesNeeded * coveragePerBox;
-  } else {
-    boxesNeeded = 1;
-    actualCoverage = coveragePerBox;
-  }
-
-  // Price per sqft for display
-  const pricePerSqft = coveragePerBox > 0 ? currentPrice / coveragePerBox : 0;
-
   const handleAddToCart = () => {
-    if (isSqftProduct && !hasInput) {
-      toast.error("Please enter the Sq.ft or Boxes you need before adding to cart");
-      return;
-    }
     addToCart({
       size: selectedSize || "default",
       variantId: selectedVariant?.id || product.id,
       stripeId: selectedVariant?.stripeId || `product_${product.id}`,
       productId: product.id,
-      quantity: isSqftProduct ? boxesNeeded : quantity,
-      ...(isSqftProduct && hasInput && {
-        sqft: lastEdited === 'sqft' ? sqftNum : actualCoverage,
-        coveragePerBox,
-      }),
+      quantity,
     });
 
     toast.success("Added to cart!");
@@ -246,34 +206,13 @@ export const ProductInfo = ({ product, onVariantChange }: ProductInfoProps) => {
           <span className="text-sm text-slate-600">Price:</span>
           {currentPrice > 0 ? (
             <>
-              {isSqftProduct && product.pricePerSqft && product.pricePerSqft > 0 ? (
+              <span className="text-3xl font-bold text-orange-500">₹{currentPrice.toFixed(0)}</span>
+              {currentMRP && currentMRP > currentPrice && (
                 <>
-                  <span className="text-3xl font-bold text-orange-500">₹{product.pricePerSqft.toFixed(0)}</span>
-                  <span className="text-sm text-slate-600">/sq.ft</span>
-                  <span className="text-sm text-slate-400">or</span>
-                  <span className="text-xl font-semibold text-slate-600">₹{currentPrice.toFixed(0)}</span>
-                  <span className="text-sm text-slate-600">/box</span>
-                  {currentMRP && currentMRP > currentPrice && (
-                    <>
-                      <span className="text-lg text-slate-400 line-through">₹{currentMRP.toFixed(0)}</span>
-                      <span className="text-sm font-semibold text-green-600 bg-green-100 px-2 py-1 rounded">
-                        {Math.round(((currentMRP - currentPrice) / currentMRP) * 100)}% OFF
-                      </span>
-                    </>
-                  )}
-                </>
-              ) : (
-                <>
-                  <span className="text-3xl font-bold text-orange-500">₹{currentPrice.toFixed(0)}</span>
-                  {currentMRP && currentMRP > currentPrice && (
-                    <>
-                      <span className="text-lg text-slate-400 line-through">₹{currentMRP.toFixed(0)}</span>
-                      <span className="text-sm font-semibold text-green-600 bg-green-100 px-2 py-1 rounded">
-                        {Math.round(((currentMRP - currentPrice) / currentMRP) * 100)}% OFF
-                      </span>
-                    </>
-                  )}
-                  <span className="text-sm text-slate-600">/ {product.unit === 'Sq.ft' ? 'box' : 'unit'}</span>
+                  <span className="text-lg text-slate-400 line-through">₹{currentMRP.toFixed(0)}</span>
+                  <span className="text-sm font-semibold text-green-600 bg-green-100 px-2 py-1 rounded">
+                    {Math.round(((currentMRP - currentPrice) / currentMRP) * 100)}% OFF
+                  </span>
                 </>
               )}
             </>
@@ -292,21 +231,13 @@ export const ProductInfo = ({ product, onVariantChange }: ProductInfoProps) => {
               currentStock > 10 ? 'text-yellow-600' :
                 'text-red-600'
               }`}>
-              {currentStock} {product.unit === 'Sq.ft' ? 'boxes' : 'units'} available
+              {currentStock} units available
             </span>
           </div>
         )}
         {currentStock === 0 && (
           <div className="mt-3 pt-3 border-t border-orange-200">
-            <button
-              onClick={() => setIsEnquiryModalOpen(true)}
-              className="w-full flex items-center justify-center gap-2 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-              </svg>
-              Enquire Now
-            </button>
+            <p className="text-sm font-semibold text-red-600 text-center">Out of Stock</p>
           </div>
         )}
       </div>
@@ -449,208 +380,56 @@ export const ProductInfo = ({ product, onVariantChange }: ProductInfoProps) => {
         </div>
       )}
 
-      {/* Finish selector — always full row when sq.ft product, else side-by-side with quantity */}
-      {isSqftProduct ? (
-        <>
-          {/* Finish — full width for sq.ft products */}
-          {uniqueFinishes.length > 0 && (
-            <div>
-              <h3 className="text-sm font-semibold text-slate-800 mb-3">Select Finish</h3>
-              <select
-                value={selectedFinish}
-                onChange={(e) => setSelectedFinish(e.target.value)}
-                className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all font-medium text-slate-700"
-              >
-                <option value="">Choose finish...</option>
-                {uniqueFinishes.map((finish: any) => (
-                  <option key={finish} value={finish}>
-                    {finish.charAt(0).toUpperCase() + finish.slice(1)}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* ── Sq.ft Tile Calculator ── */}
-          <div className="border border-slate-200 rounded-xl overflow-hidden">
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-200">
-              <h3 className="text-sm font-semibold text-slate-800">Select Quantity</h3>
-              <a
-                href="/calculator"
-                className="flex items-center gap-1 text-xs text-orange-600 hover:text-orange-700 font-medium"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                How much do I need? Calculate Now
-              </a>
-            </div>
-
-            {/* Size Guide thumbnail */}
-            {product.images && product.images.length > 0 && (
-              <div className="px-4 pt-3 flex items-center gap-3">
-                <div className="w-14 h-14 rounded-lg overflow-hidden border border-slate-200 flex-shrink-0">
-                  <img
-                    src={(product.images.find((i: any) => i.isFeatured) || product.images[0])?.url}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="text-xs text-slate-500">
-                  <div className="font-medium text-slate-700">{product.size || 'Size Guide'}</div>
-                  {product.tilesPerBox && <div>{product.tilesPerBox} tiles/box · {coveragePerBox} Sq.ft/box</div>}
-                  {pricePerSqft > 0 && <div className="text-orange-600 font-medium">₹{pricePerSqft.toFixed(2)} per Sq.ft</div>}
-                </div>
-              </div>
-            )}
-
-
-            {/* Sq.ft row */}
-            <div className="px-4 pt-4">
-              <div className="flex items-center gap-3">
-                <span className="w-20 text-sm font-semibold text-slate-700 flex-shrink-0">Sq. ft.</span>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="Enter Sq.ft"
-                  value={lastEdited === 'boxes' ? (boxesNum > 0 ? (boxesNum * coveragePerBox).toFixed(2) : '') : sqftInput}
-                  onChange={(e) => {
-                    setSqftInput(e.target.value);
-                    setLastEdited('sqft');
-                  }}
-                  className="flex-1 px-4 py-3 border-2 border-orange-400 rounded-lg text-center text-xl font-bold text-slate-800 focus:outline-none focus:border-orange-500 bg-orange-50"
-                />
-              </div>
-            </div>
-
-            {/* OR divider */}
-            <div className="flex items-center px-4 py-2 gap-3">
-              <div className="flex-1 h-px bg-slate-200" />
-              <span className="text-xs font-bold text-slate-400">OR</span>
-              <div className="flex-1 h-px bg-slate-200" />
-            </div>
-
-            {/* Boxes row */}
-            <div className="px-4 pb-4">
-              <div className="flex items-center gap-3">
-                <span className="w-20 text-sm font-semibold text-slate-700 flex-shrink-0">Boxes</span>
-                <input
-                  type="number"
-                  min="1"
-                  placeholder="1"
-                  value={lastEdited === 'sqft' ? (sqftNum > 0 ? String(boxesNeeded) : '') : boxesInput}
-                  onChange={(e) => {
-                    setBoxesInput(e.target.value);
-                    setLastEdited('boxes');
-                  }}
-                  className="flex-1 px-4 py-3 border-2 border-slate-300 rounded-lg text-center text-xl font-bold text-slate-800 focus:outline-none focus:border-orange-400 bg-white"
-                />
-              </div>
-            </div>
-
-            {/* Helper message */}
-            <div className={`mx-4 mb-4 px-3 py-2.5 rounded-lg text-xs border ${
-              hasInput && lastEdited === 'sqft' && sqftNum !== actualCoverage
-                ? 'bg-amber-50 border-amber-200 text-amber-800'
-                : hasInput
-                ? 'bg-green-50 border-green-200 text-green-800'
-                : 'bg-slate-50 border-slate-200 text-slate-600'
-            }`}>
-              {hasInput ? (
-                lastEdited === 'sqft' ? (
-                  // Only show rounding warning if the entered value isn't already a perfect box multiple
-                  sqftNum !== actualCoverage ? (
-                    <>Quantity to be ordered in full boxes. So please enter <strong>{actualCoverage.toFixed(2)} Sq.ft</strong> for exactly {boxesNeeded} {boxesNeeded === 1 ? 'box' : 'boxes'}.</>
-                  ) : (
-                    // Perfect match — no rounding needed
-                    <>✓ {boxesNeeded} {boxesNeeded === 1 ? 'box' : 'boxes'} selected, covering exactly <strong>{actualCoverage.toFixed(2)} Sq.ft</strong>.</>
-                  )
-                ) : (
-                  <>✓ {boxesNeeded} {boxesNeeded === 1 ? 'box' : 'boxes'} selected, covering {actualCoverage.toFixed(2)} Sq.ft total.</>
-                )
-              ) : (
-                <>Enter Sq.ft needed above. We&apos;ll calculate full boxes automatically (1 box = {coveragePerBox} Sq.ft).</>
-              )}
-            </div>
-
-            {/* Total Coverage Area */}
-            {hasInput && (
-              <div className="mx-4 mb-3 flex justify-between items-center py-2.5 px-3 bg-slate-50 rounded-lg border border-slate-200">
-                <span className="text-sm text-slate-600">Total Coverage Area</span>
-                <span className="text-sm font-bold text-slate-800">{actualCoverage.toFixed(2)} Sq.ft</span>
-              </div>
-            )}
-
-            {/* Total Amount */}
-            <div className="mx-4 mb-4 flex justify-between items-center py-3 px-4 bg-slate-900 text-white rounded-lg">
-              <div>
-                <div className="text-xs text-slate-400">Total Amount</div>
-                <div className="text-xs text-slate-400 mt-0.5">
-                  {hasInput ? boxesNeeded : 1} {(hasInput ? boxesNeeded : 1) === 1 ? 'box' : 'boxes'} × ₹{currentPrice}
-                </div>
-              </div>
-              <span className="text-2xl font-bold">
-                ₹{(currentPrice * (hasInput ? boxesNeeded : 1)).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </span>
+      {/* Finish + Quantity side by side */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {uniqueFinishes.length > 0 && (
+          <div>
+            <h3 className="text-sm font-semibold text-slate-800 mb-3">Select Finish</h3>
+            <select
+              value={selectedFinish}
+              onChange={(e) => setSelectedFinish(e.target.value)}
+              className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all font-medium text-slate-700"
+            >
+              <option value="">Choose finish...</option>
+              {uniqueFinishes.map((finish: any) => (
+                <option key={finish} value={finish}>
+                  {finish.charAt(0).toUpperCase() + finish.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+        <div>
+          <h3 className="text-sm font-semibold text-slate-800 mb-3">Select Quantity</h3>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center border-2 border-gray-300 rounded-lg">
+              <button
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                className="px-4 py-2 text-xl font-semibold text-slate-700 hover:bg-gray-100 transition-colors"
+              >−</button>
+              <input
+                type="number"
+                value={quantity}
+                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                className="w-20 text-center py-2 font-semibold text-slate-800 focus:outline-none bg-white"
+                min="1"
+              />
+              <button
+                onClick={() => setQuantity(quantity + 1)}
+                className="px-4 py-2 text-xl font-semibold text-slate-700 hover:bg-gray-100 transition-colors"
+              >+</button>
             </div>
           </div>
-        </>
-      ) : (
-        <>
-          {/* Non-sq.ft: Finish + Quantity side by side */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {uniqueFinishes.length > 0 && (
-              <div>
-                <h3 className="text-sm font-semibold text-slate-800 mb-3">Select Finish</h3>
-                <select
-                  value={selectedFinish}
-                  onChange={(e) => setSelectedFinish(e.target.value)}
-                  className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all font-medium text-slate-700"
-                >
-                  <option value="">Choose finish...</option>
-                  {uniqueFinishes.map((finish: any) => (
-                    <option key={finish} value={finish}>
-                      {finish.charAt(0).toUpperCase() + finish.slice(1)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-            <div>
-              <h3 className="text-sm font-semibold text-slate-800 mb-3">Select Quantity</h3>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center border-2 border-gray-300 rounded-lg">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="px-4 py-2 text-xl font-semibold text-slate-700 hover:bg-gray-100 transition-colors"
-                  >−</button>
-                  <input
-                    type="number"
-                    value={quantity}
-                    onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-20 text-center py-2 font-semibold text-slate-800 focus:outline-none bg-white"
-                    min="1"
-                  />
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="px-4 py-2 text-xl font-semibold text-slate-700 hover:bg-gray-100 transition-colors"
-                  >+</button>
-                </div>
-              </div>
-            </div>
-          </div>
+        </div>
+      </div>
 
-          {/* Total Price for non-sq.ft */}
-          <div className="bg-slate-900 text-white rounded-lg p-4">
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Total Price:</span>
-              <span className="text-2xl font-bold">₹{(currentPrice * quantity).toFixed(0)}</span>
-            </div>
-          </div>
-        </>
-      )}
+      {/* Total Price */}
+      <div className="bg-slate-900 text-white rounded-lg p-4">
+        <div className="flex justify-between items-center">
+          <span className="text-sm">Total Price:</span>
+          <span className="text-2xl font-bold">₹{(currentPrice * quantity).toFixed(0)}</span>
+        </div>
+      </div>
 
       {/* Action Buttons */}
       <div className="flex gap-3">
@@ -673,23 +452,12 @@ export const ProductInfo = ({ product, onVariantChange }: ProductInfoProps) => {
           )}
         </button>
 
-        {/* Enquire Now - 40% width (or 90% if no price or no stock) */}
-        <button
-          onClick={() => setIsEnquiryModalOpen(true)}
-          className={`${!product.price || product.price === 0 || currentStock === 0 ? 'w-[90%] bg-orange-500 hover:bg-orange-600' : 'w-[40%] bg-blue-600 hover:bg-blue-700'} text-white py-4 rounded-lg transition-colors font-semibold text-lg flex items-center justify-center gap-2`}
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-          </svg>
-          {!product.price || product.price === 0 ? 'Enquire for Price' : currentStock === 0 ? 'Enquire Now' : 'Enquire Now'}
-        </button>
-
-        {/* Add to Cart - 50% width - Only shown if price is available and stock > 0 */}
+        {/* Add to Cart - 90% width - Only shown if price is available and stock > 0 */}
         {product.price && product.price > 0 && currentStock !== 0 ? (
           <button
             onClick={handleAddToCart}
             disabled={isAdding}
-            className="w-[50%] bg-orange-500 text-white py-4 rounded-lg hover:bg-orange-600 transition-colors font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-[90%] bg-orange-500 text-white py-4 rounded-lg hover:bg-orange-600 transition-colors font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {isAdding ? (
               <>
@@ -708,7 +476,14 @@ export const ProductInfo = ({ product, onVariantChange }: ProductInfoProps) => {
               </>
             )}
           </button>
-        ) : null}
+        ) : (
+          <button
+            disabled
+            className="w-[90%] bg-slate-200 text-slate-500 py-4 rounded-lg font-semibold text-lg cursor-not-allowed"
+          >
+            {currentStock === 0 ? 'Out of Stock' : 'Contact Us for Price'}
+          </button>
+        )}
       </div>
 
       {/* Price on Request Message - Only shown if no price */}
@@ -724,7 +499,7 @@ export const ProductInfo = ({ product, onVariantChange }: ProductInfoProps) => {
       <div className="mt-4 flex gap-3">
         {/* WhatsApp Button */}
         <a
-          href={`https://wa.me/919738522119?text=Hi, I'm interested in *${encodeURIComponent(product.name)}*%0A%0AProduct Link: ${encodeURIComponent(window.location.href)}`}
+          href={`https://wa.me/${config.contact.phone.replace(/[^\d]/g, '')}?text=Hi, I'm interested in *${encodeURIComponent(product.name)}*%0A%0AProduct Link: ${encodeURIComponent(window.location.href)}`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex-1 flex items-center justify-center gap-2 py-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-semibold text-lg"
@@ -737,7 +512,7 @@ export const ProductInfo = ({ product, onVariantChange }: ProductInfoProps) => {
 
         {/* Phone Call Button */}
         <a
-          href="tel:+919738522119"
+          href={`tel:${config.contact.phone.replace(/\s/g, '')}`}
           className="flex-1 flex items-center justify-center gap-2 py-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-semibold text-lg"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -746,15 +521,6 @@ export const ProductInfo = ({ product, onVariantChange }: ProductInfoProps) => {
           Call Us
         </a>
       </div>
-
-      {/* Enquiry Modal — pass pre-filled quantity so user doesn't have to re-enter */}
-      <EnquiryModal
-        isOpen={isEnquiryModalOpen}
-        onClose={() => setIsEnquiryModalOpen(false)}
-        product={product}
-        prefillSqft={isSqftProduct && hasInput && lastEdited === 'sqft' ? sqftNum : undefined}
-        prefillBoxes={isSqftProduct && hasInput ? boxesNeeded : undefined}
-      />
     </div>
   );
 };

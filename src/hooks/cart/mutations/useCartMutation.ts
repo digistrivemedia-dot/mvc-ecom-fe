@@ -17,15 +17,13 @@ export const useCartMutation = () => {
       stripeId: string;
       productId: number;
       quantity?: number;
-      sqft?: number;
-      coveragePerBox?: number;
     }) => {
-      const { variantId, size, stripeId, productId, quantity = 1, sqft, coveragePerBox } = params;
+      const { variantId, size, stripeId, productId, quantity = 1 } = params;
 
       const response = await fetch("/api/user/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ variantId, size, stripeId, productId, quantity, sqft, coveragePerBox }),
+        body: JSON.stringify({ variantId, size, stripeId, productId, quantity }),
       });
 
       if (!response.ok) {
@@ -44,8 +42,6 @@ export const useCartMutation = () => {
       stripeId: string;
       productId: number;
       quantity?: number;
-      sqft?: number;
-      coveragePerBox?: number;
     }) => {
       const { variantId, size, stripeId, productId, quantity = 1 } = params;
 

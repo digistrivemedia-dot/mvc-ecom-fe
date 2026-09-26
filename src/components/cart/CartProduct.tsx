@@ -33,8 +33,6 @@ interface CartProductProps {
   size: CartItem["size"];
   quantity: CartItem["quantity"];
   variant: ProductVariant;
-  sqft?: number;
-  coveragePerBox?: number;
 }
 
 export const CartProduct = ({
@@ -43,8 +41,6 @@ export const CartProduct = ({
   size,
   quantity,
   variant,
-  sqft,
-  coveragePerBox,
 }: CartProductProps) => {
   const { name, cuttedPrice, category, id } = product;
   const productLink = `/${category}/${id}?variant=${variant.color}`;
@@ -100,15 +96,6 @@ export const CartProduct = ({
               )}
             </div>
           </div>
-
-          {/* Sq.ft info for tile products */}
-          {sqft && coveragePerBox && (
-            <div className="text-xs text-slate-500 bg-orange-50 border border-orange-200 rounded-lg px-3 py-1.5">
-              <span className="font-medium text-orange-700">{quantity} {quantity === 1 ? 'Box' : 'Boxes'}</span>
-              {' · '}{sqft.toFixed(2)} Sq.ft
-              {' · '}covers {(quantity * coveragePerBox).toFixed(2)} Sq.ft total
-            </div>
-          )}
 
           {/* Controls: Size/Color + Quantity + Delete — all below image on mobile */}
           <div className="flex flex-wrap items-center justify-between gap-3">

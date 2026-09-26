@@ -5,12 +5,12 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { signOut, useSession } from "@/lib/auth/client";
 import { toast } from "sonner";
+import { config } from "@/constants/config";
 import {
   HiHome,
   HiShoppingBag,
   HiFolder,
   HiClipboardList,
-  HiMail,
   HiNewspaper,
   HiTag,
   HiUsers,
@@ -41,11 +41,6 @@ const sidebarItems = [
     title: "Orders",
     href: "/admin/orders",
     icon: HiClipboardList,
-  },
-  {
-    title: "Enquiries",
-    href: "/admin/enquiry",
-    icon: HiMail,
   },
   {
     title: "Blogs",
@@ -103,7 +98,7 @@ export function Sidebar() {
             <HiShoppingBag className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="font-bold text-lg">Tiles Admin</h1>
+            <h1 className="font-bold text-lg">{config.appName} Admin</h1>
             <p className="text-xs text-slate-400">Management Panel</p>
           </div>
         </Link>

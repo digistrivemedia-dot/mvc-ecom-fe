@@ -69,7 +69,7 @@ export default function BlogPostPage() {
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
-      'Tile Trends': 'bg-purple-500',
+      'Product Trends': 'bg-purple-500',
       'Installation Tips': 'bg-blue-500',
       'Design Ideas': 'bg-green-500',
       'Maintenance Guide': 'bg-yellow-500',

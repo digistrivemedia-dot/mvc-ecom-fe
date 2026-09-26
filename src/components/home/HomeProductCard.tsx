@@ -3,12 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import dynamic from "next/dynamic";
 import { WishlistButton } from "./WishlistButton";
-
-const EnquiryModal = dynamic(
-  () => import("../product-detail/EnquiryModal").then((mod) => ({ default: mod.EnquiryModal }))
-);
 
 interface HomeProductCardProps {
     product: {
@@ -20,15 +15,10 @@ interface HomeProductCardProps {
         cuttedPrice?: number;
         slug: string;
         variants?: any[];
-        unit?: string;
-        coverage?: number;
-        tilesPerBox?: number;
-        pricePerSqft?: number;
     };
 }
 
 export const HomeProductCard = ({ product }: HomeProductCardProps) => {
-    const [isEnquiryOpen, setIsEnquiryOpen] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     // Collect all images: main product image + variant images
@@ -61,7 +51,6 @@ export const HomeProductCard = ({ product }: HomeProductCardProps) => {
     };
 
     return (
-        <>
             <div className="group bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-slate-200 hover:-translate-y-2">
                 {/* Image Container */}
                 <div className="relative h-64 overflow-hidden bg-gray-100">
@@ -103,28 +92,14 @@ export const HomeProductCard = ({ product }: HomeProductCardProps) => {
                         </>
                     )}
 
-                    {/* Enquire Button - Top Left (always show) */}
-                    <div className="absolute top-3 left-3 z-10">
-                        <button
-                            onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setIsEnquiryOpen(true);
-                            }}
-                            className="px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-300 text-xs font-semibold shadow-lg"
-                        >
-                            Enquire Now
-                        </button>
-                    </div>
-
                     {/* Wishlist Badge - Top Right */}
                     <div className="absolute top-3 right-3 z-10">
                         <WishlistButton productId={product._id} />
                     </div>
 
-                    {/* Discount Badge - Top Left Below Enquire Button */}
+                    {/* Discount Badge - Top Left */}
                     {product.cuttedPrice && product.cuttedPrice > product.price && (
-                        <div className="absolute top-14 left-3 z-10">
+                        <div className="absolute top-3 left-3 z-10">
                             <span className="px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-full shadow-lg">
                                 {Math.round(((product.cuttedPrice - product.price) / product.cuttedPrice) * 100)}% OFF
                             </span>
@@ -148,13 +123,6 @@ export const HomeProductCard = ({ product }: HomeProductCardProps) => {
                     <div className="flex items-center gap-2 mb-4">
                         {product.price === 0 ? (
                             <p className="text-2xl font-bold text-yellow-600">Get Price</p>
-                        ) : product.unit === 'Sq.ft' && product.pricePerSqft && product.pricePerSqft > 0 ? (
-                            <>
-                                <p className="text-2xl font-bold text-yellow-600">
-                                    ₹{product.pricePerSqft.toLocaleString('en-IN')}
-                                </p>
-                                <p className="text-sm text-gray-500">/ sq.ft</p>
-                            </>
                         ) : (
                             <>
                                 <p className="text-2xl font-bold text-yellow-600">
@@ -178,21 +146,5 @@ export const HomeProductCard = ({ product }: HomeProductCardProps) => {
                     </Link>
                 </div>
             </div>
-
-            {/* Enquiry Modal */}
-            <EnquiryModal
-                isOpen={isEnquiryOpen}
-                onClose={() => setIsEnquiryOpen(false)}
-                product={{
-                    id: product._id,
-                    name: product.name,
-                    price: product.price,
-                    img: product.image,
-                    unit: product.unit,
-                    coverage: product.coverage,
-                    tilesPerBox: product.tilesPerBox,
-                }}
-            />
-        </>
     );
 };
